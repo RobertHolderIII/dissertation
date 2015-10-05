@@ -1,0 +1,33 @@
+\newpage
+\pagestyle{empty}
+
+\begin{center}
+\vspace{0.1in}
+\large{\bf ABSTRACT} \par  
+\bigskip \bigskip
+\end{center}
+
+\begin{flushleft}
+{\bf Title of Thesis:} \thesistitle{}\\
+\fullname{}, Ph.D. in Computer Science, 2015 \\
+\begin{singlespace}
+{\bf Thesis directed by:}{\hspace{2.5mm}} \parbox[t]{3in}{Dr. Timothy Finin, Professor and \\ Dr. Marie desJardins, Professor \\
+Department of Computer Science and \\ Electrical Engineering}
+\end{singlespace}
+\end{flushleft}
+
+
+Computing solutions to intractable planning problems is particularly problematic in dynamic, real-time domains.  For example, visitation planning problems, such as a delivery truck that must deliver packages to various locations, can be mapped to a Traveling Salesman Problem (TSP).  The TSP is an NP-complete problem, requiring planners to use heuristics to find solutions to any significantly large problem instance, and can require a lengthy amount of time.  Planners that solve the dynamic variant, the Dynamic Traveling Salesman Problem (DTSP), calculate an efficient route to visit a set of potentially changing locations \citep{psaraftis88dynamic}.  When a new location becomes known, DTSP planners typically use heuristics to add the new locations to the previously computed route.  Depending on the placement and quantity of these new locations, the efficiency of this adapted, approximated solution can vary significantly \citep{psaraftis95dynamic,laporte00classical,larsen2000dvrp}.  Solving a DTSP in real time thus requires choosing between a TSP planner, which produces a relatively good but slowly generated solution, and a DTSP planner, which produces a less optimal solution relatively quickly.
+
+Instead of quickly generating approximate solutions or slowly generating better solutions at runtime, this dissertation introduces an alternate approach of precomputing a library of high-quality solutions \textit{prior} to runtime.  One could imagine a library containing a high-quality solution for every potential problem instance consisting of potential new locations, but this approach obviously does not scale with increasing problem complexity.  Because complex domains preclude creating a comprehensive library, I instead choose a subset of all possible plans to include. Strategic plan selection will ensure that the library contains appropriate plans for future scenarios.
+
+%Properly indexed, problem instances with the same solutions tend to be clustered in homogeneous regions within the problem space. The algorithms presented in this dissertation attempt to discover these regions by sampling the problem space, and estimate the overall structure of the space. 
+%There are a large number of new problem instances, but generally a much smaller number of unique plans
+%Thus the strategy is to identify the clusters
+
+
+
+% Be certain to add one final blank page to the thesis when you submit it (according to 2005 UMBC Grad School Formatting Requirements).  The template does not do this automatically so that the table of contents won't include a blank entry.
+
+\par\vfil
+

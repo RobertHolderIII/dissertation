@@ -1,0 +1,21 @@
+package holder.ps;
+
+import java.awt.geom.Point2D;
+import java.util.Vector;
+
+public class Solution{
+    private Vector<Point2D.Double> fixedPoints;
+    public double getDistance(Point2D.Double variablePoint){
+	double totalDistance = 0;
+	for (int i = 1; i < fixedPoints.size(); i++){
+	    Point2D.Double p1 = fixedPoints.get(i-1) == null? variablePoint : fixedPoints.get(i-1);
+	    Point2D.Double p2 = fixedPoints.get(i) == null? variablePoint : fixedPoints.get(i);
+	    totalDistance += p1.distance(p2);
+	}
+	return totalDistance;
+    }
+
+    public boolean isBetterThan(Solution otherSolution, Point2D.Double variablePoint){
+	return this.getDistance(variablePoint) < otherSolution.getDistance(variablePoint);
+    }
+}//end class Solution

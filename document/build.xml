@@ -1,0 +1,151 @@
+<project>
+  
+  <property name="tex-file"          value="thesis"/>
+  <property name="remote-user"	     value="holder1"/>
+  <property name="remote-host"	     value="gl.umbc.edu"/>
+  <property name="remote-dir"	     value="~/latexStuff/dissertation"/>
+  <property file="addl.properties"/>
+  <input message="password for ${remote-user}@${remote-host}:" addproperty="remote-passwd"/>
+
+  <!-- ~~~~~~~~~~~~~~~~ -->
+  <!-- BASIC OPERATIONS -->
+  <!-- ~~~~~~~~~~~~~~~~ -->
+
+  <target name="send-file-to-umbc">
+    <scp localFile="${send-file-to-umbc.filename}"
+         remoteTodir="${remote-user}:${remote-passwd}@${remote-host}:${remote-dir}"
+ 	 sftp="false"
+	 verbose="true"
+	 trust="true"/>
+  </target>
+
+  <target name="call-remote-latex">
+    <condition property="call-remote-latex.scriptname" value="doit">
+      <not>
+        <isset property="call-remote-latex.scriptname"/>
+      </not>
+    </condition>
+    <sshexec host="${remote-host}"
+	     username="${remote-user}"
+	     password="${remote-passwd}"
+	     trust="true"
+	     command="cd ${remote-dir} ; ${call-remote-latex.scriptname} ${call-remote-latex.basename}"
+	     timeout="120000" />
+  </target>
+
+  <target name="get-file-from-umbc">
+    <scp remoteFile="${remote-user}:${remote-passwd}@${remote-host}:${remote-dir}/${get-file-from-umbc.filename}"
+         localTodir="."
+	 verbose="true"
+	 trust="yes"/>
+  </target>
+
+  <!-- ~~~~~~~~~~~~~~~~ -->
+  <!-- MAKE  OPERATIONS -->
+  <!-- ~~~~~~~~~~~~~~~~ -->
+
+  <target name="make-outline">
+    <antcall target="send-file-to-umbc">
+      <param name="send-file-to-umbc.filename" value="chapter4outline.tex"/>
+    </antcall>
+    <antcall target="call-remote-latex">
+      <param name="call-remote-latex.basename" value="chapter4outline"/>
+    </antcall>
+    
+    <antcall target="get-file-from-umbc">
+      <param name="get-file-from-umbc.filename" value="chapter4outline.pdf"/>
+    </antcall>
+
+  </target>
+  
+  <target name="make">
+    <antcall target="send-file-to-umbc">
+      <param name="send-file-to-umbc.filename" value="${tex-file}.tex"/>
+    </antcall>
+
+    <antcall target="send-file-to-umbc">
+      <param name="send-file-to-umbc.filename" value="approvalsheet.tex"/>
+    </antcall>
+
+    <antcall target="send-file-to-umbc">
+      <param name="send-file-to-umbc.filename" value="curriculumvitae.tex"/>
+    </antcall>
+
+    <antcall target="send-file-to-umbc">
+      <param name="send-file-to-umbc.filename" value="abstract.tex"/>
+    </antcall>
+
+    <antcall target="send-file-to-umbc">
+      <param name="send-file-to-umbc.filename" value="titlepage.tex"/>
+    </antcall>
+
+    <antcall target="send-file-to-umbc">
+      <param name="send-file-to-umbc.filename" value="copyright.tex"/>
+    </antcall>
+
+    <antcall target="send-file-to-umbc">
+      <param name="send-file-to-umbc.filename" value="dedication.tex"/>
+    </antcall>
+
+    <antcall target="send-file-to-umbc">
+      <param name="send-file-to-umbc.filename" value="acknowledgment.tex"/>
+    </antcall>
+
+
+    <antcall target="send-file-to-umbc">
+      <param name="send-file-to-umbc.filename" value="chapter-Intro.tex"/>
+    </antcall>
+
+    <antcall target="send-file-to-umbc">
+      <param name="send-file-to-umbc.filename" value="chapter-Background.tex"/>
+    </antcall>
+
+    <antcall target="send-file-to-umbc">
+      <param name="send-file-to-umbc.filename" value="chapter-Results.tex"/>
+    </antcall>
+
+
+
+    <antcall target="send-file-to-umbc">
+      <param name="send-file-to-umbc.filename" value="chapter-PSAApproximation.tex"/>
+    </antcall>
+
+    <antcall target="send-file-to-umbc">
+      <param name="send-file-to-umbc.filename" value="chapter-Framework.tex"/>
+    </antcall>
+
+<!--
+    <antcall target="send-file-to-umbc">
+      <param name="send-file-to-umbc.filename" value="chapter-ApproximationAlgConfiguration.tex"/>
+    </antcall>
+-->
+    <antcall target="send-file-to-umbc">
+      <param name="send-file-to-umbc.filename" value="chapter-Applications.tex"/>
+    </antcall>
+
+    <antcall target="send-file-to-umbc">
+      <param name="send-file-to-umbc.filename" value="chapter-FutureWork.tex"/>
+    </antcall>
+
+    <antcall target="send-file-to-umbc">
+      <param name="send-file-to-umbc.filename" value="chapter-Conclusion.tex"/>
+    </antcall>
+
+    <antcall target="send-file-to-umbc">
+      <param name="send-file-to-umbc.filename" value="thesis.bib"/>
+    </antcall>
+
+
+    <antcall target="call-remote-latex">
+      <param name="call-remote-latex.basename" value="${tex-file}"/>
+    </antcall>
+
+    <antcall target="get-file-from-umbc">
+      <param name="get-file-from-umbc.filename" value="${tex-file}.pdf"/>
+    </antcall>
+  </target>
+
+  
+</project>
+	
+ 

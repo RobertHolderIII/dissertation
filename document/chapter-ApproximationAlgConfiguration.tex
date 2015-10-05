@@ -1,0 +1,11 @@
+\chapter{Approximation Algorithm Configuration}
+\thispagestyle{plain}
+
+\label{ch:configuration}
+Our technique allows a system to find solutions for large numbers of similar problem instances, providing useful information in domains that do not allow for large amounts of replanning time once an incident occurs, but in which there is some time before such an incident.  In the case of the SBE example, the generation of the PS Map at a sample rate of .004 required $\sim$9 seconds to sample 32 problem instances and complete the map approximation.
+
+Given that the sample rate determines the accuracy of the approximated map, a system would want to use the highest sample rate possible.  In the case where the system knows the expected time until a disruptive event occurs, then this technique could be used as a contract algorithm \cite{Zilberstein99real-timeproblem-solving}, with a sample rate:
+\begin{equation*}
+rate = \frac{time_{prec}}{time_{inst}*n_{inst}} ,
+\end{equation*}
+where $time_{prec}$ is the estimated time preceding the disruptive event, $time_{inst}$ is the time required to solve a single problem instance, and $n_{inst}$ is the total number of problem instances in the space.  In the case where there is no knowledge of the length of time until the disruptive event, then the system can define  $time_{prec}$ as a periodic ``refresh'' interval that triggers the generation of a new PS Map; or use a real-time algorithm approach in which PS Maps are generated with successively larger sample rates until the time of the event.

@@ -1,0 +1,31 @@
+\chapter{Framework}
+\thispagestyle{plain}
+
+\label{ch:framework}
+
+The framework adapts to new domains by allowing the specification of the problem instance, solution, and a solver to convert the problem instance into a solution.  Generating PS Maps requires the specfication of a problem space to define the range of problem instances of interest.  Finally, if visualization is desired, a problem space adapter and display augmenter may be defined.
+
+This framework is implemented in Java.  The base classes need to define a problem domain are GenericProblemInstance, GenericSolution, GenericSolver, GenericProblemSpace, ProblemSpaceAdapter, and DisplayAugmenter.
+
+\section{Problem Instance}
+
+A problem instance is defined as set of key-value pairs.  For example, a problem instance in the knapsack domain defines set of items and the knapsack capacity.  Assuming an item is represented as Item(\textit{name},\textit{weight},\textit{value}), a typical key-value pair in the problem instance may be (``map'', Item(``map'',9,150)), where ``map'' is the key, and the item is the value.  The knapsack capacity could be represented by a key-value pair such as (``weight'',400).
+
+In addition to the key-value pairs representing the elements of the problem instance, a definition of distance between problem instances must be defined.  Approximation algorithms that estimate solutions to unsolved problem instances based on the solutions of solved problem instances may use distance to select the solved problem instances to consider.
+
+The abstract GenericProblemInstance class implements the functionality described above.  Users of this class are required to extend the class and define the \textit{distance} method.
+
+\section{Solution}
+
+Similar to a problem instance, a solution is also a set of key-value pairs representing a solution to a problem instance.  In the knapsack problem, this may appear as one key with a value that is a list such as (``items'', (Item(``map'',9,150), Item(``water'',153,200), Item(``umbrella'',73,40)), or one key per item as in the problem instance.
+
+A solution is not specific to a problem instance.  Typically it defines static key-value pairs and may leave open slots for the characteristics of the problem instance to which it is applied.  For example, the solution to a traveling saleman problem is an ordering of coordinate locations with flags to indicate when to visit the location specifed by the problem instance.  One representation may be  ((0,0), (2,0), (3,2), null, (4,4), (6,5)), indicating that when applied to a problem instance, the null element should be replaced with instance's location.  A knapsack solution may not need a specific flag, rather it may define a mapping from an item name to a quantity to be place in the knapsack, thus the solution can be applied to any problem instance that defines item names and their weight and value.
+
+The abstract GenericSolution requires the definition an algorithm for calculating its utility when is it applied to a problem instance.  In addition to a utility calculation, an implementation must also define a function that determines if a solution is feasible for a given problem instance.  In domains such as a traveling salesman problem, this function will always return a true value, as any ordering of locations is feasible.  However a domain with constraints, such as the weight limitation of the knapsack problem, will define this method to enforce those constraints.  Finally, a GenericSolution should define a method to test for equality between solutions.
+
+\section{Solver}
+
+\section{Problem Space}
+
+\section{Visualization}
+

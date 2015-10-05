@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- WARNING: Eclipse auto-generated file.
+              Any modifications will be overwritten.
+              To include a user specific buildfile here, simply create one in the same
+              directory with the processing instruction <?eclipse.ant.import?>
+              as the first entry and export the buildfile again. -->
+<project basedir="." default="build" name="dissertation">
+    <property environment="env"/>
+    <property name="ECLIPSE_HOME" value="C:/eclipse"/>
+    <property name="file_prompt:ideal file" value="../../ccc/code/HLTKB-all/validator/pom.xml"/>
+    <property name="file_prompt:approx file" value="../../ccc/code/HLTKB-all/validator/pom.xml"/>
+    <property name="junit.output.dir" value="junit"/>
+    <property name="debuglevel" value="source,lines,vars"/>
+    <property name="target" value="1.6"/>
+    <property name="source" value="1.6"/>
+    <path id="JUnit 4.libraryclasspath">
+        <pathelement location="${ECLIPSE_HOME}/plugins/org.junit4_4.5.0.v20090824/junit.jar"/>
+        <pathelement location="${ECLIPSE_HOME}/plugins/org.hamcrest.core_1.1.0.v20090501071000.jar"/>
+    </path>
+    <path id="dissertation.classpath">
+        <pathelement location="code/classes"/>
+        <pathelement location="code/lib/commons-cli-1.2.jar"/>
+        <pathelement location="code/lib/or124.jar"/>
+        <pathelement location="code/lib/libsvm.jar"/>
+        <pathelement location="code/lib/weka.jar"/>
+        <pathelement location="code/lib/cloning-1.7.8.jar"/>
+        <pathelement location="code/lib/jmathplot.jar"/>
+        <pathelement location="code/lib/commons-exec-1.1.jar"/>
+        <path refid="JUnit 4.libraryclasspath"/>
+        <pathelement location="code/lib/commons-lang-2.4.jar"/>
+        <pathelement location="code/lib/commons-io-2.3.jar"/>
+        <pathelement location="code/lib/commons-collections-3.2.1.jar"/>
+    </path>
+    <target name="init">
+        <mkdir dir="code/classes"/>
+        <copy includeemptydirs="false" todir="code/classes">
+            <fileset dir="code/src">
+                <exclude name="**/*.launch"/>
+                <exclude name="**/*.java"/>
+                <exclude name="holder/wsn/"/>
+            </fileset>
+        </copy>
+    </target>
+    <target name="clean">
+        <delete dir="code/classes"/>
+    </target>
+    <target depends="clean" name="cleanall"/>
+    <target depends="build-subprojects,build-project" name="build"/>
+    <target name="build-subprojects"/>
+    <target depends="init" name="build-project">
+        <echo message="${ant.project.name}: ${ant.file}"/>
+        <javac debug="true" debuglevel="${debuglevel}" destdir="code/classes" source="${source}" target="${target}">
+            <src path="code/src"/>
+            <exclude name="holder/wsn/"/>
+            <classpath refid="dissertation.classpath"/>
+        </javac>
+    </target>
+    <target description="Build all projects which reference this project. Useful to propagate changes." name="build-refprojects"/>
+    <target name="AddProblemSpaceToPSMaps">
+        <java classname="holder.util.AddProblemSpaceToPSMaps" failonerror="true" fork="yes">
+            <classpath refid="dissertation.classpath"/>
+        </java>
+    </target>
+    <target name="BatchK (1)">
+        <java classname="holder.knapsack.BatchK" failonerror="true" fork="yes">
+            <jvmarg line="-Xmx512m"/>
+            <classpath refid="dissertation.classpath"/>
+        </java>
+    </target>
+    <target name="BatchSC cardinality">
+        <java classname="holder.sc.old.BatchSC" failonerror="true" fork="yes">
+            <classpath refid="dissertation.classpath"/>
+        </java>
+    </target>
+    <target name="BatchTSP">
+        <java classname="holder.ideal.BatchTSP" failonerror="true" fork="yes">
+            <arg line="code/tsp.properties"/>
+            <classpath refid="dissertation.classpath"/>
+        </java>
+    </target>
+    <target name="Domain">
+        <java classname="holder.Domain" failonerror="true" fork="yes">
+            <classpath refid="dissertation.classpath"/>
+        </java>
+    </target>
+    <target name="FourDimIdealPSMapper">
+        <java classname="holder.ideal.FourDimIdealPSMapper" failonerror="true" fork="yes">
+            <jvmarg line="-Xmx1024m"/>
+            <classpath refid="dissertation.classpath"/>
+        </java>
+    </target>
+    <target name="GenericAccuracyChecker">
+        <java classname="holder.util.GenericAccuracyChecker" failonerror="true" fork="yes">
+            <arg line="&quot;${file_prompt:ideal file}&quot;&#13;&#10;&quot;${file_prompt:approx file}&quot;"/>
+            <classpath refid="dissertation.classpath"/>
+        </java>
+    </target>
+    <target name="GenericProblemSpace">
+        <java classname="holder.GenericProblemSpace" failonerror="true" fork="yes">
+            <classpath refid="dissertation.classpath"/>
+        </java>
+    </target>
+    <target name="GenericVisualizer">
+        <java classname="holder.vis.GenericVisualizer" failonerror="true" fork="yes">
+            <jvmarg line="-Xmx512m"/>
+            <classpath refid="dissertation.classpath"/>
+        </java>
+    </target>
+    <target name="KBatchSC">
+        <java classname="holder.knapsack.KBatchSC" failonerror="true" fork="yes">
+            <classpath refid="dissertation.classpath"/>
+        </java>
+    </target>
+    <target name="KProblemInstance">
+        <java classname="holder.knapsack.KProblemInstance" failonerror="true" fork="yes">
+            <classpath refid="dissertation.classpath"/>
+        </java>
+    </target>
+    <target name="KProblemSpace">
+        <java classname="holder.knapsack.KProblemSpace" failonerror="true" fork="yes">
+            <classpath refid="dissertation.classpath"/>
+        </java>
+    </target>
+    <target name="KRealtimeSolver">
+        <java classname="holder.rt.KRealtimeSolver" failonerror="true" fork="yes">
+            <jvmarg line="-ea"/>
+            <arg line="&quot;C:\\Documents and Settings\\holderh1\\My Documents\\umbc\\dissertation\\psmap-4-w14_24-v30_40.ser&quot;"/>
+            <classpath refid="dissertation.classpath"/>
+        </java>
+    </target>
+    <target name="PSMapCalculator">
+        <java classname="holder.sbe.PSMapCalculator" failonerror="true" fork="yes">
+            <classpath refid="dissertation.classpath"/>
+        </java>
+    </target>
+    <target name="PSMapSolveOrApprox">
+        <java classname="holder.sc.old.PSMapSolveOrApprox" failonerror="true" fork="yes">
+            <classpath refid="dissertation.classpath"/>
+        </java>
+    </target>
+    <target name="SCRunner">
+        <java classname="holder.knapsack.SCRunner" failonerror="true" fork="yes">
+            <jvmarg line="-Xmx1024m"/>
+            <classpath refid="dissertation.classpath"/>
+        </java>
+    </target>
+    <target name="SVMRunner - no sbe">
+        <java classname="holder.tsp.SVMRunner" failonerror="true" fork="yes">
+            <jvmarg line="-Xmx1024m"/>
+            <classpath refid="dissertation.classpath"/>
+        </java>
+    </target>
+    <target name="SVMRunner - sbe">
+        <java classname="holder.tsp.SVMRunner" failonerror="true" fork="yes">
+            <jvmarg line="-Xmx1024m"/>
+            <arg line="--sbe"/>
+            <classpath refid="dissertation.classpath"/>
+        </java>
+    </target>
+    <target name="TreeSetTest">
+        <java classname="TreeSetTest" failonerror="true" fork="yes">
+            <classpath refid="dissertation.classpath"/>
+        </java>
+    </target>
+    <target name="Visualizer af psmap-af-v2.ser">
+        <java classname="holder.af.Visualizer" failonerror="true" fork="yes">
+            <arg line="psmap-af-v2.ser"/>
+            <classpath refid="dissertation.classpath"/>
+        </java>
+    </target>
+    <target name="Visualizer af psmap-af.ser">
+        <java classname="holder.af.Visualizer" failonerror="true" fork="yes">
+            <arg line="psmap-af.ser"/>
+            <classpath refid="dissertation.classpath"/>
+        </java>
+    </target>
+    <target name="Visualizer">
+        <java classname="holder.vis.Visualizer" failonerror="true" fork="yes">
+            <classpath refid="dissertation.classpath"/>
+        </java>
+    </target>
+    <target name="VisualizerTest">
+        <mkdir dir="${junit.output.dir}"/>
+        <junit fork="yes" printsummary="withOutAndErr">
+            <formatter type="xml"/>
+            <test name="holder.af.VisualizerTest" todir="${junit.output.dir}"/>
+            <classpath refid="dissertation.classpath"/>
+        </junit>
+    </target>
+    <target name="IdealMapper" description="generate ideal and approx ps map for elevator domain">
+        <java classname="holder.elevator.IdealMapper" failonerror="true" fork="yes">
+            <classpath refid="dissertation.classpath"/>
+        </java>
+    </target>
+    <target name="junitreport">
+        <junitreport todir="${junit.output.dir}">
+            <fileset dir="${junit.output.dir}">
+                <include name="TEST-*.xml"/>
+            </fileset>
+            <report format="frames" todir="${junit.output.dir}"/>
+        </junitreport>
+    </target>
+</project>

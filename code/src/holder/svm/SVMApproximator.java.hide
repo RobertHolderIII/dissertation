@@ -1,0 +1,152 @@
+package holder.svm;
+
+import holder.GenericPSMap;
+import holder.GenericProblemInstance;
+import holder.GenericProblemSpace;
+import holder.GenericSolution;
+import holder.InstancePointConverter;
+import holder.knapsack.KSCApproximator;
+import holder.util.Util;
+
+import java.awt.Point;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
+import weka.classifiers.Classifier;
+import weka.classifiers.Evaluation;
+import weka.core.Attribute;
+import weka.core.FastVector;
+import weka.core.Instance;
+import weka.core.Instances;
+
+public class SVMApproximator<P extends GenericProblemInstance, S extends GenericSolution> extends KSCApproximator<P,S> {
+
+	/**
+	 *
+	 */
+	private static final long serialVersionUID = 1L;
+
+	/**
+	 * defines the mapping from a problem instance to a point in the problem space
+	 */
+	private final InstancePointConverter<P> psAdapter;
+
+	public SVMApproximator(InstancePointConverter<P> psAdapter){
+		this.psAdapter = psAdapter;
+	}
+
+	@Override
+	public GenericPSMap<P, S> generate(GenericProblemSpace<P> problemSpace,	double sampleRate) {
+
+		//use ceiling so we don't end up taking sample sizes of zero
+		final int numberOfInstances = problemSpace.getInstanceCount();
+		final int numMaxSamples = (int) Math.ceil(sampleRate * numberOfInstances);
+
+
+		//sample and solve problem instances
+		GenericPSMap<P,S> psmap = Util.getSampleSolutions(problemSpace, numMaxSamples, solver);
+    	psmap.setProblemSpace(problemSpace);
+
+
+
+
+    	Set<S> solutionSet = new HashSet<S>(psmap.values());
+    	ArrayList<S> solutions = new ArrayList<S>(solutionSet);
+    	Map<S,String> solutionToIndexMap = new HashMap<S,String>();
+
+    	//LibSVM cannot handle unary class (i.e. sampling only found one solution)
+    	if (solutions.size() == 1){
+    		S singleSolution = solutions.get(0);
+    		for (P problemInstance : problemSpace){
+				if (psmap.containsKey(problemInstance)){
+					continue;
+				}
+				psmap.put(problemInstance, singleSolution);
+    		}
+    		return psmap;
+    	}
+
+
+    	//use SBE to help with training data??????
+
+
+    	//use solved problem instance to set training data
+    	//TODO this assume 2 dimensions, and will have to be changed.
+    	//define attributes
+    	final int NUMBER_OF_DIMENSIONS = 2;
+    	Attribute attribute1 = new Attribute("x");
+		Attribute attribute2 = new Attribute("y");
+
+		FastVector fvClassVal = new FastVector(solutions.size());
+		int solutionIndex = 0;
+		for (int i=0;i<solutions.size();i++){
+			String index = String.valueOf(i);
+			fvClassVal.addElement(index);
+			solutionToIndexMap.put(solutions.get(i),index);
+		}
+		Attribute classAttribute = new Attribute("solutionId", fvClassVal);
+		FastVector fvWekaAttributes = new FastVector(NUMBER_OF_DIMENSIONS+1);
+		fvWekaAttributes.addElement(attribute1);
+		fvWekaAttributes.addElement(attribute2);
+		fvWekaAttributes.addElement(classAttribute);
+
+		// Create an empty training set
+		Instances isTrainingSet = new Instances("trainingSet", fvWekaAttributes, psmap.size());
+		// Set class index
+		isTrainingSet.setClassIndex(fvWekaAttributes.size()-1);
+
+		// create instances
+		for (Map.Entry<P, S> entry: psmap.entrySet()){
+			Instance instance = new Instance(NUMBER_OF_DIMENSIONS+1);
+			instance.setDataset(isTrainingSet);
+			Point p = psAdapter.getGraphicPoint(entry.getKey());
+			instance.setValue(0, p.x);
+			instance.setValue(1, p.y);
+			instance.setValue(2, solutionToIndexMap.get(entry.getValue()));
+			isTrainingSet.add(instance);
+		}
+
+		try{
+
+	    	//do classification
+			Classifier cModel = new weka.classifiers.functions.LibSVM();
+			cModel.buildClassifier(isTrainingSet);
+
+
+	    	//classify unsolved problem instances
+			Evaluation eTest = new Evaluation(isTrainingSet);
+			for (P problemInstance : problemSpace){
+				if (psmap.containsKey(problemInstance)){
+					continue;
+				}
+
+				Point p = psAdapter.getGraphicPoint(problemInstance);
+
+				Instance instance = new Instance(NUMBER_OF_DIMENSIONS+1);
+				instance.setDataset(isTrainingSet);
+				instance.setValue(0, p.x);
+				instance.setValue(1, p.y);
+				double result = eTest.evaluateModelOnce(cModel, instance);
+
+				S solution = solutions.get(Integer.parseInt((String)fvClassVal.elementAt((int)result)));
+
+				//update psmap
+				psmap.put(problemInstance,solution);
+
+
+			}
+
+
+
+	    	return psmap;
+
+		}catch(Exception ex){
+			ex.printStackTrace();
+			return null;
+		}
+	}
+
+}

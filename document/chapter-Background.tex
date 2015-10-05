@@ -1,0 +1,144 @@
+\chapter{Background \& Related Work}
+\thispagestyle{plain}
+
+\label{ch:background}
+
+My work primarily focuses on developing a plan library for future use as the planning environment changes.  Related work for two plan reuse strategies, \textit{universal planning} and \textit{case-based reasoning}, are presented below.  I then present two alternatives to \textit{a priori} planning.  \textit{Robust planning} techniques generate plans that may be viable even when the environment changes.  \textit{Plan repair} attempts to modify an existing plan during execution in response to changes in the environment.
+
+I then discuss several works that leverage domain space and plan space information.  The final sections in this chapter present related work in the sampling and classification literature.
+
+\section{Plan Reuse \& Plan Caching}
+
+Building a plan library is similar to the general notion of plan caching and plan reuse.  The concept of plan caching in anticipation of future use is evident in backbone planning, where partial plans are precomputed; case-based reasoning (CBR), where previously executed plans are stored; and universal planning, where complete plans are precomputed.  In this section I'll briefly discuss universal planning and case-based reasoning.  Backbone planning is addressed in Section \ref{sec:state-space-analysis}.
+
+%=============================================
+
+
+\subsection{Universal Planning}
+
+Universal planners, also called reactive planners, are those that preemptively store plans in order to react quickly to new information.  One classic approach is Schoppers' universal plans \citep{schoppers87universal,schoppers89defense,schoppers94estimating,chapman89penguins}, in which a solution to every possible situation is stored in a plan library.  The drawback of this technique is the sheer number of states that must be considered \citep{ginsberg89universal,ginsberg89ginsberg,jonsson96size}.  \citeauthor{jonsson96size} (\citeyear{jonsson96size}) formally bound the size of a universal plan library for general planning problems.  They conclude that na\"{i}ve universal planning is not feasible, but the advantage of reactive planning in dynamic environments makes exploration of efficient universal planning for specific applications worthwhile.  My work attempts to provide exactly this capability.
+
+
+%=============================================
+
+\subsection{Case-Based Reasoning}
+Identifying the minimal solution set required to achieve competent coverage of a problem space is well studied in the case-based reasoning (CBR) literature.  Typically, a CBR system will encounter a problem and store the solution for future use.  CBR is normally used in domains with discrete representations, although this is not always the case \citep{ram97continuous}.  In most cases, CBR does not truly pre-plan;  rather, all of its stored solutions are generated during runtime.  Conversely, the strategies in this dissertation seek to generate its store of solutions prior to runtime.  Still, my research does borrow from work in this field.
+
+\citet{smyth01competence} measure the competence of a library by how well it covers the problem space.   \citeauthor{smyth01competence} rely on a ``Solves'' predicate to determine whether a solution is suitable for a problem instance (``case'' in CBR vernacular), and uses this information to evaluate the library's competence.  This process can also be used to reduce the library size by removing redundant cases.  My work is similar in that it seeks to determine a library's competence, but differs in the metric applied.  I proactively generate solutions that cover the complete problem space, whereas CBR typically only stores solutions to problems encountered during runtime.  In order to associate an unsolved problem instance with a solution, both our works may use a k-nearest neighbor approach.    Interestingly, \citet{massie03what} empirically demonstrate that \citeauthor{smyth01competence}'s model does not adequately predict a library's competence.
+
+The McSherry (\citeyear{mcsherry2000case}) coverage model attempts to explicitly enumerate the set of problems that a solution set can solve.  As \citeauthor{smyth01competence} note, this type of brute force approach is not scalable to most CBR systems.  My approach creates a representation similar to McSherry's model, but attempts to resolve the scalability challenge by using approximations.
+
+As an alternative to traditional case-based retrieval, \citeauthor{mcsherry03similarity}'s later work \citep{mcsherry03similarity} suggests a scheme in which cases beyond those chosen by a traditional nearest neighbor approach are considered.  Within this scheme, compromises are suggested to a user based upon a more nuanced representation of the problem or user preferences.  \citeauthor{mcsherry03similarity}'s system does not require an  exact match of the user's preferences, and is guided by policies such as {\em more-is-better}, {\em less-is-better}, or {\em nearer-is-better}.  Additionally, the scheme will offer solutions that may violate the constraints, but that offer higher utility in other dimensions.  
+
+
+%=============================================
+%=============================================
+
+\section{Planning Robust Solutions}
+
+The approaches in the previous section address adapting to the environment by caching multiple plans.  \textit{Conditional planning} is another approach to planning within changing environments in which a plan contains steps that depend on the  environment state.  For example, a plan may dictate ``if the left turn signal is green, then turn, otherwise go straight.''    \textit{Contingency planning} also uses branches, but only in the case of failures.  In one implementation of a conditional planner, \citet{onder96contingency} identify the contingencies to plan for by calculating an expected {\it disutility} for an action that fails.  Their planner chooses the actions with the highest disutility and generates a plan from a hypothetical state in which the action fails.  \citeauthor{onder96contingency} define actions and their probabilistic effects as branches.  For example, consider a factory that preprocesses parts for painting.  If the part is not processed properly, then there is a 5\% chance that the painted part will have a blemish.  If the PAINT action is invoked from a state where a part is not processed, it will have two branches:  one representing the transition to a state of a painted part with blemishes, and the other representing the state of the part without blemishes.  To start, \citeauthor{onder96contingency} create a skeletal plan in a STRIPS-like manner, without regard for contingencies.  After completing the plan, the planner searches the tree for high measures of \textit{disutility}, such as that represented by the existence of a blemished part, and the plan is refined by adding actions that would resolve the effects of the failed PAINT action.  
+
+The limitations of \citeauthor{onder96contingency}'s research include the need to enumerate all of  the effects and contingencies related to actions.  In a large or continuous domain, the effects or contingencies will be numerous or infinite.  Additionally, this research is limited to plans that can be divided into hierarchical goals.  Both  \citeauthor{onder96contingency}'s and my approaches generate contingencies for future adaptation needs.  However, my work is intended to address a comprehensive set of changes instead of only preparing for a subset.  Additionally, my work does not require enumeration of action effects, but does require some knowledge of the possible values of each state variable.
+
+\cite{DBLP:conf/aips/BurnsBRYD12} introduces \textit{online continual planning problems} (OCPPs), in which a planner continually receives new goals that it must prioritize while executing its current plans.  This situation is representative of domains such as using UAVs to monitor a region; because the environment continually changes, the region is never successfully ''monitored.''  Rather, success is the ability to continually respond to the new requirements within a suitable amount of time.  They introduce \textit{anticipatory online planning}, in which they consider future changes to the environment in their current planning.  Similar to my approach, they sample from the set of possible environmental changes.  However, they do assume a known probability distribution for these changes.  Also, they incorporate this information into the current plan in order to either resolve the goal or strategically place the system in a state that facilitates resolving the goal.  This method is distinct from my approach which always generates plans that are that are  specifically tailored for the goals in the new environment.  Also, the plans that I generate are stored as separate plans in a library rather than being incorporated into an existing plan.
+
+\cite{DBLP:conf/aips/ConradSW09} describe an approach to planning in dynamic environments through building options into a high-level plan, thus allowing a planner to choose the best option during runtime.  However, deciding between the choices can result in a significant time cost.  This can be mitigated by generating the choices offline, and storing the choices efficiently by recording a baseline plan, and then representing additional plans as differences from the baseline plan.  This allows more rapid traversal of plans during the selection process.
+
+
+
+
+%=============================================
+%=============================================
+
+
+\section{Plan Repair \& Replanning}
+
+My dissertation proposes algorithms that efficiently precompute a set of plans to mitigate changes in a planner's environment.  The major alternative to my approach is replanning through plan repair.  Typically, planners employing this scheme will execute a plan until the environment changes, effectively creating a new problem instance.  It then will modify, or \textit{repair}, the existing plan until it is applicable to the new problem instance.  This is generally faster than creating a new plan from scratch, with the tradeoff that the repaired plan may not be as good as a plan generated by a complete replan.
+
+
+One example of a plan repair system is the \textsc{Salix} planner \citep{logan97routeplanning}, which starts with a complete plan and creates new plans through various deforming operations.  In this way, the planner finds a suitable plan by searching through a solution space as opposed to a state space.  This is closely related to planning schemes that employ plan repair techniques as their primary mechanism.
+
+%For two of the test domains, plan repair will be implemented with known domain-specific algorithms.  Plan repair for TSPs consists of a simple algorithm in which a new location is inserted into the nearest path segment.
+
+%Similar to the TSP plan repair baseline, approaches for repairing a knapsack problem solution use a similar greedy algorithm in which any items with lower cost-value ratios replace those with higher cost-value ratios.
+
+
+A domain-indepedent solution by \cite{krogt05planrepair} presents a framework that intends to encompass a variety of plan repair algorithms.  They describe plan repair as consisting of removing actions from the original plan that conflict with or impede achieving the new goal during the \textit{unrefinement} stage.  Unrefinement is followed by the \textit{refinement} stage, in which actions are added to the original plan that allow it to achieve the new goal. The framework thus implements plan repair as a process alternating between  unrefinement and refinement until a  solution candidates satisfies the problem requirements.  The online repair baseline for the final test domain in this dissertation follows this framework.
+
+
+
+%=============================================
+\section{Domain and State Space Analysis}
+\label{sec:state-space-analysis}
+
+Several related works leverage plan or problem space analysis to find critical partial plans for future use. These planners take advantage of characteristics that are specific to a domain or problem type.  \citeauthor{bulka08useful}  describe learning features of a plan space to find a ``backbone'' common to a set of problem instances to use as a partial initial solution for planning \citep{bulka06analyzing,bulka08useful}.  In other cases, robots can learn critical components of plans as ``skills'' that may be applied to future plans \citep{konidaris08autonomous,konidaris08sensorimotor}.  These works and my approach have similarities, but my approach focuses on storing complete plans in rather than partial plans.
+
+\citeauthor{hoffmann01local} (\citeyear{hoffmann01local})  characterizes the topology of the planning spaces of benchmark planning problems to gain a  measure of their difficulty.  For example, a large number of states representing local minima may represent an easier problem, while a large number of states on local plateaus with few exit states (``benches'') or a large number of dead ends represents a difficult problem.   This work demonstrates the relationship between the planning space characteristics and the success of the selected heuristic.
+
+
+The hill-climbing algorithm takes advantage of the frequently continuous surface representing solution utility as a function of a specific problem instance.  By slightly modifying the solution, the algorithm can determine the gradient of the hill and search in the proper direction for better solutions.  The ``restart hill-climbing'' approach executes the hill-climbing algorithm for multiple starting solutions in order to increase the change of finding a globally optimal solution.  Otherwise, the algorithm risks limiting its search to a locally optimal region.
+
+
+The theme of characterization of a space of problem or solutions through a small set of samples is echoed in several works.  \citeauthor{boyan00learning} (\citeyear{boyan00learning})'s \textit{Stage} algorithm augments the traditional restart hillclimbing algorithm by using results from multiple iterations of restart hillclimbing to estimate the relationship between the starting state and the quality of the final state, as measured by an objective function.  In this way, Stage can estimate the initial state that is most likely to optimize the objective function.  
+
+
+
+Stage varies the initial state to map the relationship between the starting state and the final state within a single problem instance.  By contrast, myapproach varies the problem instance to map the relationship between a problem instance and problem solution within a set of problem instances.  Thus, my approach is more analogous to \citeauthor{boyan00learning}'s brief description of their \textit{X-Stage} algorithm, which explores how information from one problem instance can be applied to other instances.  X-Stage uses the Stage feedback from multiple previously solved instances as the input to a voting mechanism that informs the starting state for unsolved problem instances.  \citeauthor{boyan00learning}'s voting approach parallels my SC-based algorithms.  In their case, the results were mixed.  In both experiments, the X-Stage algorithm approached the solution more rapidly than Stage, but in one experiment, the solution achieved by X-Stage was inferior to that achieved by Stage.
+
+\citeauthor{gopal02plan} (\citeyear{gopal02plan}) use plan space visualization to quickly compare tumor treatment plans.  A plan consists of a vector trajectory over which to apply radiation.  Because a trajectory will generally pass through both healthy tissue and tumor, plans that minimize healthy tissue's exposure and maximize the tumor's exposure are preferred.  To assist physicians with choosing a treatment plan, the effects of multiple plans are calculated and plotted into an n-dimensional plan space with axes representing the effect on the various organs.  Their work is similar to ours in terms of indexing of plans.  However, our work indexes plans by the characteristics of the problem being solved, whereas \citeauthor{gopal02plan}'s work indexes plans by characteristics of the plan.  Additionally, any visualizations generated by my work are tangential artifacts, whereas \citeauthor{gopal02plan}'s visualizations are intended as the primary product.  A natural extension of their work would be to infer the utility of plans not explicitly addressed by their solver, similar to my motivations.  The authors present some initial thoughts about more rapidly populating the plan space with better automation of the calculations, but do not consider inferring plan characteristics.  Given the critical nature of their domain, explicitly performing calculations is likely the more appropriate approach.
+
+The TIM domain analyzer, used within the STAN4 planner \citep{fox01hybrid}, recognizes subproblems characteristic of path-planning or resource management problems and routes them to the FORPLAN planner, a planner optimized for those domains.  Other subproblems are sent to the domain-generic  STAN3 planner.  Thus, \citeauthor{fox01hybrid} decompose a planning problem into subproblems that map to domains for which domain-specific algorithms can be utilized.  One aspect of this dissertation's suggested future work is to decompose a homogeneous planning problem in a general fashion, matching the problem instance to an appropriate algorithm chosen from a set of options.
+
+
+\cite{domshla10max} seek to optimize the use of multiple heuristics in search.  Their goal is to optimize the tradeoff between spending too much time calculating heuristics for states that will be expanded, regardless of the results, versus spending too little time calculating heuristics and wasting time expanding states that do not contribute to the optimal solution.  They introduce a map of the state space showing the ideal heuristic to employ at each state. Their goal is to learn the map by taking samples from the state space as input to a Bayes net, thus identifying the relative accuracy of the  heuristics as a function of the location in the search space.  During search, the heuristic is chosen by computing the tradeoff between each heuristic's computation time and expected accuracy. This approach achieves better results than the use of either individual heuristic.  Their approach is analogous to mine in that they explicitly define an ideal map that they attempt to approximate through sampling and classification.
+
+
+\section{Classification}
+
+The classification techniques used in my algorithms are based upon k-nearest neighbor (kNN) and support vector machines (SVM).
+
+K-nearest neighbor \citep{cover67nearestneighbor} is a simple approach to classification in which a data point is classified by surveying the classification of its k nearest neighbors.  The data point is then classified based on the plurality vote of the classifications.  %A variation of this technique is used in various algorithms that I present.
+
+A support vector machine \citep{vapnik95svm} uses a hyperplane to divide a space such that distance between the hyperplane and points of differing classifications is maximized.  Newer techniques allow for non-linear division by using the ``kernel trick'' in which a space is transformed to make a linear division of the space is possible.
+
+%Other classification techniques of interest include Bayes Net, such as that used by \cite{domshla10max}
+
+
+
+\section{Sampling Techniques}
+
+My research relies on an initial sampling of the planning space to seed the subsequent classification.  The classification is thus dependent on a sample that adequately represents the planning space.  The primary sampling techniques -- random sampling and active learning -- are described below, along with several related alternates.
+
+
+%\url{http://en.wikipedia.org/wiki/Supervised_learning#Active_Learning}.  
+
+\textit{Active learning} \citep{Settles10activelearning} techniques iteratively refine an interpolation by acquiring additional information after each completed interpolation.  One approach for classification, \textit{minimum marginal hyperplane}, requests information about points close to the hyperplane that a support vector machine would construct.
+
+\textit{Maximum curiosity} is an alternate approach that tests each unknown data point to see which would be most beneficial to increase accuracy.  To scale to a large number of data points, such a technique would have to choose a subset of the points to consider.
+
+
+Several sampling techniques stem from the experimental design domain.   Validating complex systems or models by exhaustive testing is not feasible due to the large number of variable combinations.  However, Latin hypercube sampling (LHS) can identify critical combinations of variables for testing.   Nearly orthogonal Latin hypercube sampling (NOLHS) \citep{cioppa2002orthogonal}  is an extension that, at high dimensions, results in a lower average distance between sample points and is computationally less costly.  Early components of this dissertation considered adapting these techniques to problem space sampling \citep{holder08improving}.  As a basis for initial sampling, schemes based on hypercube sampling \citep{mckay79comparison, ye00algorithmic, cioppa2002orthogonal} or stratified sampling variants \citep{mckay79comparison, kwok2006semistatic} are relevant.  Following an initial sample, a biased sampling scheme like exponential sampling \citep{holder06company}, in which samples become closer to each other in a geometric progression as they get closer to a target location, would assist with more thoroughly exploring areas of interest.
+
+Instead of calculating the complete set of samples at one time, another approach is to start from a single point and stochastically expand.  Rapidly exploring Random Trees (RRT) explore a space by branching out from an initial location, with a bias towards unexplored subregions.  Unmodified, an RRT explores a space in a uniform manner.  However, work such as bi-directional RRT  \citep{lavalle01randomized}, Rapidly exploring Evolutionary Trees (RET) \citep{martin09offline}, Extended Rapidly exploring Random Trees (ERRT) \citep{bruce02real-time}, and other variants \citep{zucker07multipartite, ferguson06replanning} demonstrate biasing the tree growth towards areas of interest, even in a potentially changing environment.  %citations from martin09offline
+
+
+%=============================================
+%\section{Interpolation}
+
+%Interpolation refers to finding values for inputs that are not explicitly in a dataset.  For PS Map approximation, this refers to classifying an unsampled problem instance into a solution region.  For SPU Map approximation, this refers to finding a function representing the utility degradation of a solution when applied to unsampled problem instances.
+
+%\section{Regression}
+
+%Regression attempts to fit a function to a set of points, minimizing the distance between the known points and the chosen function.  This distance is typically measured the sum of the squares of the distance between each point and the function, in which case it is the ``Mean Squared Error'' (MSE).  The kernel of a regression is the assumed form of the function.  The choice of kernel greatly affects the type of regression obtained, so one attempts to choose the function form that likely matches the underlying data structure.  For example, if the known data points seem to lie in line, then fitting a linear function will produce a better estimation of the unknown data points.  Choosing a quadratic or higher degree function will reduce the MSE, but likely results in over fitting.  That is, the fitted function will match the data points exactly, but not be a good estimate for the unknown points.  This phenomenon occurs because there may error in the known data points, or the points may not represent an exact characterization of the underlying data structure.
+
+
+%importance sampling text text text
+
+%\section{Plan Similarity}
+
+%Planning or state space topology is useful for generating a single plan.  In expanding this concept to multiple plans, thereby considering the solution or problem space topology, hopefully regularities in the structure exist that may be exploited.  As the ``proximity'' of one plan to another can be a measure of topology, work in characterizing plan similarity is relevant.
+
+%\section{Plan Adaptation \& Repair}
+
+%Because plan adaptation and plan repair attempt to solve a planning problem by modifying a complete plan, this could be viewed as traversing the solution space.  Typically the modifications to the plan are heuristically determined by the constraints represented by the problem instance.  However, one could envision an evaluation of the topology of the solution space serving as an additional heuristic to guide plan adaptation.  Unfortunately, my current search of the literature has not discovered any such techniques.
+

@@ -1,0 +1,2 @@
+IdealFile	ApproxFile	TSPsSolved	SampleSize	MatchPercent	AvgPctUtilityLoss
+C:\Documents and Settings\HOLDERH1\My Documents\umbc\flairs2011\data\v4\ideal_maps\smooth-psmap-tsp-10-R-instance0.ser	C:\Documents and Settings\HOLDERH1\My Documents\umbc\flairs2011\data\v4\ideal_maps\sss-10_100000.0-0-smooth-psmap-tsp-10-R-instance0.ser	1	1.0E-4	0.30950617283950616	0.1419365172426055

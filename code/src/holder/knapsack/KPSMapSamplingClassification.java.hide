@@ -1,0 +1,122 @@
+package holder.knapsack;
+
+import holder.GenericPSMap;
+import holder.GenericProblemInstance;
+import holder.GenericProblemSpace;
+import holder.GenericSolution;
+import holder.Solver;
+import holder.util.GenericUtil;
+import holder.util.Util;
+
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
+public class KPSMapSamplingClassification<P extends GenericProblemInstance, S extends GenericSolution> extends KSCApproximator<P,S> {
+
+
+	/**
+	 *
+	 */
+	private static final long serialVersionUID = 1L;
+
+	/**
+	 * @param args
+	 */
+
+
+	protected GenericPSMap<P,S> getSampleSolutions(Set<P> unkSamples, int sampleSz, Solver<P,S> solver){
+		return Util.getSampleSolutions(unkSamples, sampleSz, solver);
+	}
+
+
+	@Override
+	public GenericPSMap<P,S> generate(GenericProblemSpace<P> problemSpace, double sampleRate){
+		Set<P> unknownSamples = GenericUtil.convertProblemSpaceToUnknownSamples(problemSpace);
+
+		//use ceiling so we don't end up taking sample sizes of zero
+		final int sampleSize = (int) Math.ceil(sampleRate * unknownSamples.size());
+
+		GenericPSMap<P,S> psmap = this.getSampleSolutions(unknownSamples, sampleSize, solver);
+
+
+		GenericPSMap<P,S> initialSamples = new GenericPSMap<P,S>();
+
+		//remove solved samples from unknown samples set
+		for (P pi : psmap.keySet()){
+			unknownSamples.remove(pi);
+			initialSamples.put(pi,psmap.get(pi));
+		}
+
+		for (P pi : unknownSamples){
+			S s = pollNearbyProblemInstances(initialSamples,pi,initialPollingRadius);
+			psmap.put(pi,s);
+		}
+
+		return psmap;
+	}
+
+	private S pollNearbyProblemInstances(GenericPSMap<P,S> solvedInstances, P centroidPi, int pollingRadius) {
+		Map<S,Double> poll = new HashMap<S,Double>();
+
+		int solvedInstancesConsidered = 0;
+
+		for (P pi: solvedInstances.keySet()){
+			if (pi.distance(centroidPi) <= pollingRadius){
+					S s = solvedInstances.get(pi);
+					Double solutionCount = poll.get(s);
+
+					Double newSolutionCount = updateSolutionScore(pi, s, solutionCount, centroidPi);
+					poll.put(s, newSolutionCount);
+					solvedInstancesConsidered++;
+
+			}
+		}
+		this.setNumberOfPolledPoints(solvedInstancesConsidered);
+		//see what the results are!
+		//if we have a tie, then expand polling radius
+		S maxSolution = null;
+		double maxCount = Double.NEGATIVE_INFINITY;
+		boolean duplicate = false;
+		for (S s : poll.keySet()){
+			double candidateCount = poll.get(s);
+			if (candidateCount > maxCount){
+				maxSolution = s;
+				maxCount = candidateCount;
+				duplicate = false;
+			}
+			else if (candidateCount == maxCount){
+				duplicate = true;
+			}
+		}
+
+		if (maxSolution == null){
+			return pollNearbyProblemInstances(solvedInstances, centroidPi, pollingRadius*2);
+		}
+		else if (!duplicate){
+			return maxSolution;
+		}
+		else if (solvedInstancesConsidered < solvedInstances.size()){
+			return pollNearbyProblemInstances(solvedInstances, centroidPi, pollingRadius*2);
+		}
+		else{
+			Collection<S> maxSolutions = new HashSet<S>();
+			for (S s : poll.keySet()){
+				if (poll.get(s) == maxCount){
+					maxSolutions.add(s);
+				}
+			}
+			setFinalPollingRadius(pollingRadius);
+			return Util.chooseBestSolution(maxSolutions, centroidPi);
+		}
+	}
+
+	public static void main(String[] args) {
+		// TODO Auto-generated method stub
+
+	}
+
+
+}

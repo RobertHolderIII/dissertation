@@ -1,0 +1,1 @@
+sampleRate	unanimous total	unanimous%	unanimousAvgLoss	defaultApproxTotal	defaultApprox%	defaultApproxAvgLoss	landslideTotal	landslide%	landslideApproxAvgLoss	ambiguousTotal	ambiguous%	ambiguousAvgLoss	noVotesTotal	noVotes%	noVotesAvgLoss	initialSamplesTotal	initialSamples%	initialSamplesAvgLoss

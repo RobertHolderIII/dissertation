@@ -1,0 +1,106 @@
+\chapter{Conclusion \& Future Work}
+\thispagestyle{plain}
+
+\label{ch:future}
+
+
+This dissertation introduced the concept of \textit{plan space analysis} (PSA), specifically the use of Problem-Solution Maps to rapidly allow a system to adjust its plan when it encounters a change in the environment.  Ideally, a system would have a library of plans for numerous possible changes in the environment, thereby being able to select one at runtime, rather than replanning from scratch or engaging in online repair.  Chapter \ref{ch:psa} provided  examples of PS Maps, noted that a brute-force approach to creating a PS Map is not feasible, and presented seven algorithms to approximate a PS Map.  The chapter also presented a complexity analysis of the algorithms.  Chapter \ref{ch:evaluation} described the traveling salesman problem (TSP), knapsack problem, and elevator problem as test domains and presented the results of approximating PS Maps within those domains.  The results demonstrate that the utility of the plans given by the approximated PS Map are frequently comparable to the utility of the plans generated with online repair.  Chapter \ref{ch:application} discussed approaches to determining the tradeoff between using PSA versus online repair, particularly when considering the time available for PSA calculations.  In addition to considering tradeoffs related to timing, the chapter also detailed requirements for representing the problem instances within the problem space.  Namely,
+\begin{itemize}
+\item The problem space axes should be selected such that problem instances with identical solutions are adjacent.
+\item The solutions should be  abstracted in order to create similar solutions, thus allowing for homogeneous solution regions.
+\end{itemize}
+
+In the TSP, knapsack, and elevator domains, using the variable features of the problem instance as axes for the problem space was sufficient to create homogeneous solution regions.   However, one could imagine other domains in which there are homogeneous solution regions, but  only with respect to a more complex function of the variable features, such as with the example of the game described in the chapter.  In that case, axes that considered higher-level or derived features, such as whether the numbers rolled on the dice constitute a pair or straight, would be much more useful than axes based on the numbers themselves. 
+
+Abstraction was not required for raw solutions to the TSP and knapsack problems.  However, the elevator domain did require abstraction and canonicalization for the solutions to be appropriate for the algorithms.
+
+Chapter \ref{ch:application} also described the tradeoff between expected performance and offline planning time based on examination of problem characteristics.
+
+ %Consider, for example, a planner plays poker.  It may utilize this framework in order to more quickly determine its actions as function of the cards that it may receive.  Consider that the planner that currently holds AJ and preplans for the next card that it receives.  The resulting plans resulting from the next card being an A or J would likely be similar due to both of those cards creating a pair.  In contrast to our earlier examples, the plans for A and K, although close in vlaue, would not be similar.  In this case a better indexing scheme that considers pair versus non-pair would place A and J close together, likely allowing for the algorithms to perform better by allowing the the indexing to place problem instances with similar solutions adjacent to each other.
+
+Some thoughts for extending this work follow.
+
+\section{Suboptimal Plans}
+
+The PS Map map assists in plan library creation by showing the minimum number of solutions required for optimal competency across the problem space.  In the case of a 5-city DTSP map, as few as only eight solutions are required, representing fewer than 7\% of the 120 (5!) possible solutions.  However, for large problems, storing even 7\% of the possible solutions may not be feasible.  One alternate approach is to accept suboptimal solutions in the library, particularly when one suboptimal plan may replace multiple one or more optimal plans.  In this case, this map gives hints about regions in which tolerating a suboptimal plan over a large region, in place of several plans from smaller regions, may be beneficial in reducing the number of plans in the library.
+
+\section{Automated Plan Abstraction}
+
+%AAAI08-157 Learning Generalized Plans Using Abstract Counting
+
+\cite{srivastava08generalized}'s work describes the process of transforming a plan specific to a single problem instance into a generalized plan that is appliable to more than one problem instance.  This is similar to the transformation done within the elevator domain testing, although \citeauthor{srivastava08generalized} present a general approach in which operation preconditions are examined, thus formalizing the conditions that can be generalized.  This approach would be likely be applicable when applying my work to additional planning domains.  Within the elevator domain, my approach was to transform steps such as 
+
+\begin{verbatim}
+move elevator slow0-0 to floor 2
+board passenger p1 into elevator slow0-0
+\end{verbatim}
+
+\noindent
+to 
+
+\begin{verbatim}
+elevator slow0-0 picks up passenger p1
+\end{verbatim}
+
+\noindent
+This allows the plan to be valid for any passenger location within elevator slow0-0's range.  \citeauthor{srivastava08generalized}'s abstractions would include this level of transformation, and might also consider a further generalization such as 
+
+\begin{verbatim}
+elevator slow0-0 picks up a passenger within range
+\end{verbatim}
+
+\noindent
+or even introduce loops such as
+
+\begin{verbatim}
+for each passenger p within range
+  elevator slow0-0 picks up passenger p
+\end{verbatim}
+
+The primary result would be to create similar solutions, for which the appropriate axes could create homogeneous solution regions.  This would also assist with reducing the nuber of plans to store in the library.
+
+\section{Analysis of Problem Configuration and Sample Rate}
+As mentioned in Chapter \ref{ch:application}, the ability to estimate the configuration of the solution region would be helpful in determining the appropriate sample rate to increase the effectiveness of the approximation algorithms.  Future work could entail finding a correlation between problem domain configuration and the sample rate that should be targeted for a good approximation.
+
+\section{Sampling-based Motion Planning}
+%sampling-based motion planning
+
+In robot motion planning, one way to reduce the computational complexity of path planning is to represent the area of operations as a set of discrete cells and points, called \textit{C-space}.  Sampling the operations area will provide a subset of the obstacles that the plan must have the robot avoid, effectively creating a plan with relaxed constraints.  A plan that is not feasible with the relaxed constraints can be discarded, and plans that are feasible can be further refined.  
+
+The sampling in my algorithms is across full problem instances; the sampling in sampling-based planning is across the constraints of a domain, thus always generating a partially defined problem instance.  This approach would be equivalent to adding an additional index to the solution space that represented the constraint.  Because the obstacles are simply binary -- either the plan will consider the obstacle or it will not -- it may be more efficient to use sampling-based planning to sample the $2^n$ binary combinations rather than adding $n$ additional dimensions.  This would support rapid replanning in cases in which an obstacle appears or disappears during the course of plan execution.
+
+\section{NASA}
+
+\cite{DBLP:conf/aaai/Smith12} describes a challenge that the Mars Rover scientific team faces in which they must decide on a set of goals for a planner to consider.  There are many constraints to consider that would make for a challenging planning problem, however, the key issue is that the scientists do not have a way to evaluate the tradeoffs between the goals they may consider.  \citeauthor{DBLP:conf/aaai/Smith12} proposes a solution in which scientists are able to consider a variety of plans from which they could get a sense of what goal combinations are feasible.  My work could be suitable for this initial need.  However, the second need that \citeauthor{DBLP:conf/aaai/Smith12} describes is plan explanation, in which scientists could ask why one goal is included in the plan and not another, as well as what-if questions that allow them to explore tradeoffs between their goals.  
+
+A PS Map for a planning domain shows the set of solutions available for a set of potential changes in the problem space.  An interesting extension may be a PS Map that gives information about the set of solutions two steps removed from the current environment.  In principle, this could be accomplished by adding axes to the problem space representing all two-hop changes, similar to a TSP PS Map that considers more  than one new location. However, in more traditional planning domain, it may be possible to exploit the temporal relationship between two-hop changes to create the map more efficiently.
+
+
+%Additionally, \citeauthor{smyth01competence} only address the question of competence in a binary fashion.  One extension of the techniques described in this dissertation would be the Solution-Problem Utility (SPU) Map, which determines the competency of a solution as a measure of utility, thus allowing for tradeoffs to be made after the competency evaluation.  More explicitly, imagine two solutions that both resolve a problem with some utility.  The Solves predicate cannot distinguish between two solutions that are both deemed competent or incompetent, whereas an SPU Map would more finely choose between solutions of varying utility.
+
+%\section{Additional PSA components}
+
+%Although appropriate plan abstraction can reduce the number of plans that must be stored in a library, it may be necessary to further reduce the number of plans.  If the system can plans with less quality, then 
+
+\section{Solver Validation}
+In addition to library generation, the SBE techniques suggest a mathematical framework that proves the solution similarity of groups of problem instances.   When comparing approximate maps to the high-quality maps, I found instances of solution variety in regions of the problem space that the SBE technique indicated should be homogeneous.  This led me to develop a ``smoothing'' technique in which I run SSS over specific groups of instances to increase the accuracy of the high-quality maps.   This approach could also be used to compensate for the flaws inherent to a heuristic solver based on search.  Future work could examine confirming the solution of a given problem intance by also solving problem instances that are similar to it and returning the best solution.  How to best mutate the given problem instance to maximize the chance of finding a better solution may be an interesting research question.
+
+
+\begin{table}
+\begin{center}
+  \begin{tabular}{|p{4.5cm}|p{3cm}|p{3cm}|}
+    \hline
+    \textbf{Configuration} & \textbf{Unsmoothed} & \textbf{Smoothed} \\ \hline
+    M=24, N=4, 6 slow, 3 fast, 3 variable & 1072 & 506 \\ \hline
+    M=24, N=6, 4 slow, 0 fast, 3 variable & 590  & 198 \\ \hline
+    \hline
+  \end{tabular}
+  \caption{Effect on smoothing on PS Maps created by a heuristic solver. ``Configuration'' refers the elevator domain's M and N parameters, the total number of elevators, and the number of passengers with variable starting positions.  ``Unsmoothed'' and ``smoothed'' is the number of unique solutions prior to and after smoothing.}
+  \label{tab:smoothing}
+\end{center}
+\end{table}
+
+
+\section{Concluding Thoughts}
+
+The challenge of rapidly finding good solutions to complex problems is a theme common to many projects in my workplace.  During the course of this work, I have been happy to discover numerous potential applications for some of the ideas presented here.  I find myself particularly interested in related problems within the Smart Grid and energy management, and hope to explore solutions to problems in that domain.  I hope that the approaches I have developed here may be of some use or inspiration to others encountering these types of problems.

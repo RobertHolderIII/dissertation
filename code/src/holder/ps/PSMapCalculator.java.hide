@@ -1,0 +1,462 @@
+package holder.ps;
+
+import holder.GenericPSMap;
+import holder.GenericProblemSpace;
+import holder.PSMap;
+import holder.tsp.TSPProblemInstance;
+import holder.tsp.TSPProblemSpace;
+import holder.tsp.TSPSolution;
+
+import java.awt.Point;
+import java.awt.Rectangle;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.Vector;
+
+import drasys.or.graph.DuplicateVertexException;
+import drasys.or.graph.PointGraph;
+import drasys.or.graph.VertexI;
+import drasys.or.graph.VertexNotFoundException;
+import drasys.or.graph.tsp.FullEnumeration;
+import drasys.or.graph.tsp.TourNotFoundException;
+
+public class PSMapCalculator{
+
+    private static final Point ORIGIN = new Point(0,0);
+
+    private static Point midPoint(Point p1, Point p2){
+	return new Point( (p1.x+p2.x)/2,
+			  (p1.y+p2.y)/2 );
+    }
+
+    /**
+     * @param pointA a point for which solution1 is better than solution2
+     * @param pointB a point for which solution2 is better than solution1
+     * @param solutionA representation of traversal order
+     * @param solutionB representation of alternate traversal order
+     * @param problemSpace boundary of points to be considered
+     * @return set of points in one solution or the other that represents the border between the two solutions
+     */
+    public static SolutionBorder findBorder(Point pointA, Point pointB, Solution solutionA, Solution solutionB, Rectangle problemSpace){
+
+	//sanity check
+	boolean misalignedPointB = solutionA.isBetterThan(solutionB, pointB);
+	boolean misalignedPointA = solutionB.isBetterThan(solutionA, pointA);
+	if (misalignedPointB || misalignedPointA){
+	    System.out.println("PSMapCalculator.findBorder: points and solutions are not aligned.  point" + (misalignedPointB?"B":"A") + " is in solution" + (misalignedPointB?"A":"B"));
+	    return new SolutionBorder(null,null);
+	}
+
+	Point candidateBorderPoint = midPoint(pointA, pointB);
+	//System.out.println("findBorder: candidateBorderPoint=" + candidateBorderPoint);
+
+	if (isOnBorder(candidateBorderPoint, solutionA, solutionB)){
+	    //System.out.println("findBorder: candidate is onBorder.  finding rest of solution");
+	    Solution candidateBorderPointSolution = solutionA.isBetterThan(solutionB,candidateBorderPoint)? solutionA : solutionB;
+	    Solution otherSolution = candidateBorderPointSolution == solutionA? solutionB : solutionA;
+	    return findRestOfBorder(candidateBorderPoint, candidateBorderPointSolution, otherSolution, problemSpace);
+	}
+	else{
+	    if (solutionA.isBetterThan(solutionB,candidateBorderPoint)){
+		//System.out.println("findBorder: candidate is not on border. part of solution A. " + solutionA);
+		Point newCandidateBorderPoint = midPoint(candidateBorderPoint, pointB);
+
+		//insure newCandidateBorderPoint is part of solution A
+		while(solutionB.isBetterThan(solutionA,newCandidateBorderPoint)){
+		    newCandidateBorderPoint = midPoint(candidateBorderPoint, pointA);
+		}
+		return findBorder(newCandidateBorderPoint, pointB, solutionA, solutionB, problemSpace);
+	    }
+	    else{
+		//System.out.println("findBorder: candidate is not on border.  part of solution B. " + solutionB);
+		Point newCandidateBorderPoint = midPoint(pointA,candidateBorderPoint);
+
+		//insure newCandidateBorderPoint is part of solution B
+		while(solutionA.isBetterThan(solutionB,newCandidateBorderPoint)){
+		    newCandidateBorderPoint = midPoint(candidateBorderPoint, pointB);
+		}
+
+		return findBorder(pointA, newCandidateBorderPoint, solutionA, solutionB, problemSpace);
+	    }
+	}
+    }//end method findBorder
+
+    private static SolutionBorder findRestOfBorder(Point borderPoint, Solution borderPointSolution, Solution otherSolution, Rectangle problemSpace){
+
+	SolutionBorder points = new SolutionBorder(borderPointSolution, otherSolution);
+	System.out.println("findRestOfBorder: starting with point " + borderPoint);
+	points.add(borderPoint,true);
+
+
+
+
+	//TODO we do this twice because the initial border point may have
+	//neighbors on both sides.  Need to make this more elegant.
+	for (int i =0; i<2; i++){
+	    System.out.println("findRestOfBorder: pass " + i);
+	    boolean done = false;
+	    Point currentBorderPoint = borderPoint;
+
+	    Set<Point> equalSolutionPoints = new HashSet<Point>();
+	    Set<Point> solutionPoints = new HashSet<Point>();
+
+	    //while we haven't run into a dead end
+	    while(!done){
+
+		//find a neighboring point that
+		//1. has not already been found as a border point AND
+		//2. is within the rectangle AND
+		//3. is in the proper solution region AND
+		//4. is on the border between the two solution regions
+
+		boolean foundNextPoint = false;
+		Point candidate;
+
+		equalSolutionPoints.clear();
+		solutionPoints.clear();
+
+		for (int xInc = -1; xInc <= 1 ; xInc++){
+		    for (int yInc = -1; yInc <= 1 ; yInc++){
+
+		    //if borders were allowed to move diagonally
+		    //then two borders could cross but not share points
+		    boolean diagonal = xInc != 0 && yInc != 0;
+		    if (diagonal) {
+				continue;
+			}
+
+
+
+			candidate = new Point(currentBorderPoint.x-xInc, currentBorderPoint.y-yInc);
+			//System.out.println("findRestOfBorder: trying point " + candidate);
+			if (! points.contains(candidate) &&
+			    problemSpace.contains(candidate) &&
+			    !otherSolution.isBetterThan(borderPointSolution, candidate) &&
+			    isOnBorder(candidate, borderPointSolution, otherSolution)){
+
+				if (borderPointSolution.isEqualTo(otherSolution, candidate)){
+					equalSolutionPoints.add(candidate);
+				}
+				else{
+				    solutionPoints.add(candidate);
+				}
+			}
+		    }//yInc
+		}//xInc
+
+		//equal point solutions are best
+		if (!equalSolutionPoints.isEmpty()){
+			currentBorderPoint = equalSolutionPoints.iterator().next();
+			points.add(currentBorderPoint,i==0); //on the first/second pass, add to the end/front
+			done = false;
+			//System.out.println("findRestOfBorder: keeping 1/" + equalSolutionPoints.size()+ " EQUAL point " + currentBorderPoint);
+		}
+		else if (!solutionPoints.isEmpty()){
+			currentBorderPoint = solutionPoints.iterator().next();
+			points.add(currentBorderPoint,i==0); //on the first/second pass, add to the end/front
+			done = false;
+			//System.out.println("findRestOfBorder: keeping 1/" + solutionPoints.size()+ " GOOD point " + currentBorderPoint);
+		}
+		else{
+			done = true;
+		}
+
+
+	    }//end while
+	}//end for
+	return points;
+
+    }//end method findRestOfBorder
+
+    /**
+     * Returns true if the problem instance containing Point p that has one solution is adjacent to a point contained in a different problem instance that has another solution
+     * For example, given two problem instances I and I' such that I contains points {a,b,c,P) and I' contains points (a,b,c,P'), if there exists
+     * a P' that is adjacent to P, and the solution to I and I' are different, then then function returns true.  This function requires that the potential
+     * solutions to I and I' are given.  Also, if both solutions are the same utility for the point, then the function returns true.
+     *
+     * @param p candidate point
+     * @param sA
+     * @param sB
+     * @return true if point P is on the border between solution regions sA and sB
+     */
+    private static boolean isOnBorder(Point p, Solution sA, Solution sB){
+
+	//TODO:  this is true for when solution metrics are the distance formula, but for some formulas the region equality can be a thick band, thus have equality points that are not border points
+	if (sA.isEqualTo(sB,p)){
+		//System.out.println("\tisOnBorder: EQUAL");
+		return true;
+	}
+
+	Solution pSolution = sA.isBetterThan(sB,p)? sA : sB;
+	Solution otherSolution = pSolution==sA? sB: sA;
+
+	for (int xInc = -1; xInc <= 1; xInc++){
+	    for (int yInc = -1; yInc <= 1; yInc++){
+			Point nextPoint = new Point(p.x+xInc, p.y+yInc);
+			if (otherSolution.isBetterThan(pSolution,nextPoint)){
+				//System.out.println("\tisOnBorder: " + p + ": opposing point: " + nextPoint);
+				return true;
+			}
+	    }
+	}
+	return false;
+    }//end method isOnBorder
+
+
+
+
+    public static void main(String[] args){
+
+				//Rectangle psRegion = new Rectangle(0,0,90,90);
+
+		TSPProblemInstance pi = new TSPProblemInstance(new Point[]{new Point(10,15),
+			    													new Point(10,10),
+			    													new Point(20,30)});
+	//	Set<SolutionBorder> borders = getSolutionBorders(1,                        //sampleRate
+	//						    psRegion,
+	//						    fixedPoints);
+
+
+
+		PSMapCalculator calc = new PSMapCalculator();
+		GenericProblemSpace<TSPProblemInstance> psRegion = new TSPProblemSpace(pi);
+		GenericPSMap<TSPProblemInstance,TSPSolution> psmap = calc.generatePSMap(.5, psRegion);
+		psmap.setProblemSpace(psRegion);
+		SolutionBorderTest.display(psmap);
+    }
+
+    /**
+     * @param sampleRate probability that any one point will be chosen as a sample
+     * @param problemSpace region of variable points of interest
+     * @param fixedPoints known destinations
+     */
+    public static Set<SolutionBorder> getSolutionBorders(double sampleRate, Rectangle problemSpace, Point ... fixedPoints){
+		//solutions <- sample solution space
+
+		HashSet<Point> fixedPointSet = new HashSet<Point>();
+		fixedPointSet.addAll(Arrays.asList(fixedPoints));
+
+		HashMap<Solution,ProblemInstance> solutions = new HashMap<Solution,ProblemInstance>();
+		for (int heightI = 0; heightI < problemSpace.height; heightI++){
+		    for (int widthI = 0; widthI < problemSpace.width; widthI++){
+
+				Point varP = new Point(widthI + problemSpace.x, heightI + problemSpace.y);
+
+				//don't process problem instance that contain points we're visiting already
+				if (fixedPointSet.contains(varP) || varP.equals(ORIGIN)) {
+					continue;
+				}
+
+				if (Math.random() < sampleRate){
+				    ProblemInstance problem = new ProblemInstance(varP, fixedPoints);
+				    Solution solution = getSolution(problem);
+
+				    //keeping a solution->problem mapping for convenience
+				    //using it later to help find borders between solutions
+				    if (!solutions.containsKey(solution)){
+					solutions.put(solution,problem);
+					System.out.println("PSMapCalculator.generatePSMap: found new solution = " + solution + " for varP = " + varP);
+				    }
+				}
+		    }//for width
+		}//for height
+
+		//find all borders
+		Set<SolutionBorder> borders = new HashSet<SolutionBorder>();
+
+		for (Solution solutionA : solutions.keySet()){
+		    for (Solution solutionB : solutions.keySet()){
+				if ( !solutionA.equals(solutionB)){
+
+				    System.out.println("generatePSMap: border for \n\t" + solutionA + "\n\t" + solutionB);
+
+				    SolutionBorder border = findBorder( solutions.get(solutionA).getPoint(),
+									solutions.get(solutionB).getPoint(),
+									solutionA,
+									solutionB,
+									problemSpace);
+				    borders.add(border);
+				}
+		    }
+		}
+
+		return borders;
+    }//end getSolutionBorders
+
+    public PSMap generatePSMap(double sampleRate, Rectangle problemSpace, Point ... fixedPoints){
+    	PSMap psmap = new PSMap();
+    	psmap.problemSpace = problemSpace;
+    	Set<SolutionBorder> borders = getSolutionBorders(sampleRate, problemSpace, fixedPoints);
+    	psmap.borders = borders;
+    	Set<BorderIntersection> borderIntersections = findBorderIntersections(borders);
+    	psmap.borderIntersections = borderIntersections;
+    	//get a collection of key points with which to start filling in map.
+    	//we want a sample at every intersection point.
+    	//we also want a sample of every border that may not have an intersection point
+    	Set<SolutionBorder> bordersWithIntersections = new HashSet<SolutionBorder>();
+    	for (BorderIntersection bInt : borderIntersections){
+    		bordersWithIntersections.addAll(Arrays.asList(bInt.borders));
+    	}
+
+    	Set<Point> keyPoints = new HashSet<Point>();
+    	for (BorderIntersection bInt : borderIntersections){
+    		keyPoints.add(bInt.intersectionPoint);
+    	}
+
+    	//it is possible for a border to exist that does not intersect another border
+    	//in this case just pick a point on the border
+    	for (SolutionBorder border : borders){
+    		if (!bordersWithIntersections.contains(border)){
+    			keyPoints.add(border.getBorderTrace().getFirst());
+    		}
+    	}
+
+    	fill(psmap, keyPoints, fixedPoints);
+
+    	return psmap;
+
+    }//end method generatePSMap
+
+    /**
+     * @param psmap working copy of Problem Solution Map
+     * @param keyPoints problem instances with known solution
+     * @param fixedPoints known solutions
+     */
+    private void fill(PSMap psmap, Set<Point> keyPoints, Point[] fixedPoints){
+
+    	if (keyPoints.isEmpty()) return;
+
+    	Point[] points = keyPoints.toArray(new Point[keyPoints.size()]);
+    	for (Point p : points){
+    		//adjust point to unknown problem instance u (end if can't find one inside problem space region)
+
+        	for (int i = -1; i <= 1; i++){
+        		for (int j = -1; j <= 1; j++){
+        			if (j != 0 && i != 0) continue;
+        			Point u = new Point(p.x+i,p.y+j);
+        			if (psmap.problemSpace.contains(u)){
+
+        				ProblemInstance pi = new ProblemInstance(p,fixedPoints);
+
+        				//if (!isPartOfBorder(pi,psmap)){
+    	        		if (true){
+
+    	        			if (!psmap.containsKey(pi)){
+	        					Solution s = psmap.get(p);
+	        					if (s == null){
+	        						s = getSolution(pi);
+	        					}
+	        					psmap.put(pi, s);
+	        					keyPoints.add(u);
+	        				}
+	        			}
+        			}
+        		}
+        	}
+        	//done with neighbors
+        	keyPoints.remove(p);
+    	}//for each key point
+
+       	fill(psmap, keyPoints, fixedPoints);
+    }
+
+    private boolean isPartOfBorder(ProblemInstance pi, PSMap psmap) {
+		for (SolutionBorder b : psmap.borders){
+			if (b.getBorderTrace().contains(pi.getPoint())) return true;
+		}
+		return false;
+	}
+
+	public static Set<BorderIntersection> findBorderIntersections(Collection<SolutionBorder> borders){
+    	Set<BorderIntersection> bInts = new HashSet<BorderIntersection>();
+
+
+    	SolutionBorder[] bordersArray = borders.toArray(new SolutionBorder[borders.size()]);
+
+    	for (int i = 0; i < bordersArray.length; i++){
+    		for (int j = i+1; j < bordersArray.length; j++){
+
+    			bInts.addAll(BorderIntersection.getIntersections(bordersArray[i],bordersArray[j]));
+    		}
+    	}
+    	return bInts;
+    }
+
+
+    private static Solution getSolution(ProblemInstance problem){
+
+	//System.out.println("PSMapCalculator.getSolution: ProblemInstance=" + problem);
+
+
+	ArrayList<Point> drasysPath = new ArrayList<Point>();
+
+	try{
+
+	    //find how much we should scale to remove all negative numbers
+	    //this is a fix for the drasys lib which doesn't seem to like negative numbers
+	    int maxNegative = 0;
+	    for (Point p : problem.getFixedPoints()){
+			maxNegative = Math.min(maxNegative,p.x);
+			maxNegative = Math.min(maxNegative,p.y);
+	    }
+	    Point pt = problem.getPoint();
+	    maxNegative = Math.min(maxNegative,pt.x);
+	    maxNegative = Math.min(maxNegative,pt.y);
+	    int offset = -maxNegative+1;
+	    //	    System.out.println("PSMapCalculator.getSolution: offset = " + offset);
+
+
+	    PointGraph graph = new PointGraph();
+	    for (Point p : problem.getFixedPoints()){
+			graph.addVertex(p,new drasys.or.geom.rect2.Point(p.x+offset,p.y+offset));
+		}
+	    pt = problem.getPoint();
+	    graph.addVertex(pt,new drasys.or.geom.rect2.Point(pt.x+offset,pt.y+offset));
+	    graph.addVertex(ORIGIN,new drasys.or.geom.rect2.Point(ORIGIN.x+offset,ORIGIN.y+offset));
+
+
+	    FullEnumeration solver = new FullEnumeration(graph);
+	    solver.constructOpenTourFrom(ORIGIN);
+	    Vector<?> tour = solver.getTour();
+
+	    //drasys returns a vector containing  vertexA, edgeAB, vertexB, edgeBC, vertexC ...
+
+	    for (int i = 0; i<tour.size(); i+=2){
+			VertexI vertex = (VertexI)tour.get(i);
+			Point javaP = (Point) vertex.getKey();
+
+			//use null to indicate the variable point
+			if (problem.getPoint().equals(javaP) ){
+			    drasysPath.add(null);
+			}
+			//use the actual point for fixed destinations
+			else if (javaP.equals(ORIGIN) || problem.getFixedPoints().contains(javaP)){
+			    drasysPath.add(javaP);
+			}
+			else{
+			    System.out.println("MASSIVE ERROR:  point returned that was not a destination!!!!  " + javaP);
+			}
+	    }
+	}catch(DuplicateVertexException ex){
+	    ex.printStackTrace();
+	}
+	catch(TourNotFoundException ex){
+	    ex.printStackTrace();
+	}
+	catch(VertexNotFoundException ex){
+	    ex.printStackTrace();
+	}
+
+	Solution solution = new Solution(drasysPath);
+	//System.out.println("\tPSMapCalculator.getSolution: Solution=" + solution);
+	return solution;
+
+    }
+
+}//end class PSMapCalculator
+
+

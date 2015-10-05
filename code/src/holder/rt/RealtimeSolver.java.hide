@@ -1,0 +1,133 @@
+package holder.rt;
+
+import holder.GenericProblemInstance;
+import holder.GenericSolution;
+import holder.PSMap;
+import holder.ProblemInstance;
+import holder.Solution;
+import holder.Solver;
+import holder.tsp.TSPSolver;
+import holder.util.Util;
+
+import java.awt.Point;
+import java.io.File;
+import java.util.List;
+import java.util.Map;
+
+import javax.swing.JFileChooser;
+
+public class RealtimeSolver extends Solver {
+
+	private final TSPSolver tspSolver = new TSPSolver();
+
+
+	public static void main(String[] args){
+		RealtimeSolver rts = new RealtimeSolver();
+
+		File[] idealPsmapFiles;
+
+		if (args.length == 0){
+
+			JFileChooser chooser = new JFileChooser(Util.DATA_DIR);
+			chooser.setMultiSelectionEnabled(true);
+			int returnVal = chooser.showOpenDialog(null);
+			if(returnVal != JFileChooser.APPROVE_OPTION) System.exit(0);
+			idealPsmapFiles = chooser.getSelectedFiles();
+		}
+		else{
+			idealPsmapFiles = new File[args.length];
+			for (int i = 0; i < args.length; i++){
+				idealPsmapFiles[i] = new File(args[i]);
+			}
+		}
+
+
+
+		for (File f : idealPsmapFiles){
+			double delta = 0;
+			double totalIdealDistance = 0;
+
+			PSMap rtPsmap = new PSMap();
+			PSMap psmap = Util.loadPSMap(f);
+
+			for (Map.Entry<ProblemInstance,Solution> entry : psmap.entrySet()){
+				double idealDistance = entry.getValue().getDistance(entry.getKey());
+				totalIdealDistance += idealDistance;
+
+				Solution realtimeSolution = rts.getSolution(entry.getKey());
+				rtPsmap.put(entry.getKey(), realtimeSolution);
+				if (!entry.getValue().equals(realtimeSolution)){
+					delta += realtimeSolution.getDistance(entry.getKey()) - idealDistance;
+					if (delta < 0){
+						System.out.println("realtime solution is better in map " + f + " for instance " + entry.getKey());
+					}
+				}
+
+				//System.out.println(i+":"+delta/totalIdealDistance);
+			}//end for mapping
+
+			System.out.println("file: " +f);
+			System.out.println("total ideal dist " + totalIdealDistance);
+			System.out.println("delta " + delta);
+			System.out.println("fraction diff" + (delta/totalIdealDistance));
+
+			File rtFile = new File(f.getParentFile(),"rt-" + f.getName());
+			Util.savePSMap(rtPsmap, rtFile);
+
+		}//end for each file
+
+
+
+	}//end main
+
+	@Override
+	public GenericSolution getSolution(GenericProblemInstance problemInstance) {
+
+		//solve for only fixed points
+
+		Solution baseSolution = tspSolver.getSolution(new ProblemInstance(null,problemInstance.getFixedPoints()));
+		List<Point> fixedPoints = baseSolution.getFixedPoints();
+
+
+		//find nearest fixed point
+		Point newPoint = problemInstance.getPoint();
+		double distance = Double.POSITIVE_INFINITY;
+		int nearestPointIndex = -1;
+
+		for (int index = 0; index < fixedPoints.size(); index++){
+			Point candidatePt = fixedPoints.get(index);
+			double candidateDist = candidatePt.distanceSq(newPoint);
+			if ( candidateDist < distance){
+				distance = candidateDist;
+				nearestPointIndex = index;
+			}
+		}
+
+		//if nearest point is origin, then add new point after it
+		if (nearestPointIndex == 0){
+			baseSolution.getFixedPoints().add(1,null);
+			return baseSolution;
+		}
+
+		//otherwise, see if point is better to place before or after
+		//nearest point
+		else{
+			Solution s1 = new Solution(baseSolution.getFixedPoints());
+			s1.getFixedPoints().add(nearestPointIndex, null);
+
+			Solution s2 = new Solution(baseSolution.getFixedPoints());
+			s2.getFixedPoints().add(nearestPointIndex+1, null);
+
+			if (s1.isBetterThan(s2,newPoint)){
+				return s1;
+			}
+			else{
+				return s2;
+			}
+		}
+
+	}
+
+
+
+}

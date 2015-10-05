@@ -1,0 +1,85 @@
+package holder.ps;
+
+import java.awt.Point;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+public class BorderIntersection {
+
+    public SolutionBorder[] borders;
+    /**
+     * canonical intersection point
+     */
+    public Point intersectionPoint;
+    
+    /**
+     * all intersection points
+     */
+    public List<Point> intersectionPoints;
+
+    private BorderIntersection(){
+	//nothing
+    }
+
+    public static Set<BorderIntersection> getIntersections(SolutionBorder sA, SolutionBorder sB){
+    	//find border intersection points
+    	List<Point> intersectionPoints = new ArrayList<Point>();
+    	for (Point p : sA.getBorderTrace()){
+    			if (sB.contains(p)){
+    				intersectionPoints.add(p);
+    			}
+
+    	}
+
+    	
+    	//collect adjacent intersection points.  these will be used to form a
+    	//cononical intersection point.
+    	ArrayList<Integer> startLocations = groupPoints(intersectionPoints);
+		
+    	Set<BorderIntersection> bInts = new HashSet<BorderIntersection>();
+		for (int i = 0; i < startLocations.size(); i++){
+		    BorderIntersection bInt = new BorderIntersection();
+		    bInt.borders = new SolutionBorder[]{sA,sB};
+		    int endLocation = i+1==startLocations.size()?intersectionPoints.size():startLocations.get(i+1);
+		    bInt.intersectionPoints = intersectionPoints.subList(startLocations.get(i), endLocation);
+		    bInt.intersectionPoint = average(bInt.intersectionPoints);
+		    bInts.add(bInt);
+		}
+
+		return bInts;
+    }//end method getIntersection
+
+    private static ArrayList<Integer> groupPoints(List<Point> intersectionPoints) {
+		ArrayList<Integer> startLocations = new ArrayList<Integer>();
+
+		if (intersectionPoints.isEmpty()){
+			//nothing
+		}
+		else{
+			startLocations.add(0);
+			for (int i = 1; i < intersectionPoints.size(); i++){
+				if (intersectionPoints.get(i).x - intersectionPoints.get(i-1).x > 1 ||
+						intersectionPoints.get(i).y - intersectionPoints.get(i-1).y > 1){
+					startLocations.add(i);
+				}
+			}
+		}
+		return startLocations;
+	}
+
+	private static Point average(Collection<Point> points){
+	double x = 0;
+	double y = 0;
+	for (Point point : points){
+	    x += point.x;
+	    y += point.y;
+	}
+
+	return new Point( (int)Math.round(x/points.size()),
+			  		(int)Math.round(y/points.size()));
+    }//end method average
+
+}//end class

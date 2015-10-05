@@ -1,0 +1,54 @@
+package holder.ps;
+
+public class PSMapCalculator{
+
+    private static Point2D.Double midPoint(Point2D.Double p1, Point2D.Double p2){
+	return new Point2D.Double( (point1.getX()+point2.getX())/2,
+				   (point1.getY()+point2.getY())/2 );
+    }
+
+    public ArrayList<Point2D.Double> findBorder(Point2D.Double point1, Point2D.Double point2, Solution solution1, Solution solution2){
+
+	
+	Point2D.Double candidateBorderPoint = midPoint(point1, point2);
+	
+	if (isOnBorder(candidateBorderPoint, solution1, solution2)){
+	    Solution candidateBorderPointSolution = solution1.contains(candidateBorderPoint)? solution1 : solution2;
+	    return findRestOfBorder(candidateBorderPoint, candidateBorderPointSolution);
+	}
+	else{
+	    if (solution1.isBetterThan(solution2,candidateBorderPoint)){
+		Point2D.Double newCandidateBorderPoint = midPoint(candidateBorderPoint, point2);
+		return findBorder(newCandidateBorderPoint, point2, solution1, solution2);
+	    }
+	    else{
+		Point2D.Double newCandidateBBorderPoint = midPoint(point1,candidateBorderPoint);
+		return findBorder(point1, newCandidateBBorderPoint, solution1, solution2);
+	    }
+	}
+    }//end method findBorder
+
+    private ArrayList<Point2D.Double> findRestOfBorder(Point2D.Double borderPoint, Solution borderPointSolution, Dimension problemSpace){
+	
+
+
+
+    }//end method findRestOfBorder
+
+    private boolean isOnBorder(Point2D.Double p, s1, s2){
+	Solution pSolution = s1.contains(p)? s1 : s2;
+	Solution otherSolution = pSolution==s1? s2: s1;
+
+	for (int xInc = -1; xInc <= 1; xInc++){
+	    for (int yInc = -1; yInc <= 1; yInc++){
+		Point2D.Double nextPoint = new Point2D.Double(p.getX()+xInc, p.getY()+yInc);
+		if (otherSolution.isBetterThan(pSolution,nextPoint)) return true;
+	    }
+	}
+	return false;
+    }//end method isOnBorder
+
+    
+	    
+
+}//end class PSMapCalculator

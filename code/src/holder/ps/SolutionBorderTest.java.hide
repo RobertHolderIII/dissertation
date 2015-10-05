@@ -1,0 +1,351 @@
+package holder.ps;
+
+import holder.PSMap;
+
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.GridLayout;
+import java.awt.Point;
+import java.awt.Rectangle;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.swing.JCheckBox;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.JSeparator;
+
+public class SolutionBorderTest{
+
+
+    private static final Solution[] CIRCLE = {new Solution(new Point(0,0),
+							   null,
+							   new Point(5,5)),
+
+					      new Solution(new Point(0,0),
+							   new Point(5,5),
+							   null)};
+
+    public static final Solution[] LINE = {new Solution(new Point(0,0),
+							null,
+							new Point(10,10),
+							new Point(20,30)),
+
+					   new Solution(new Point(0,0),
+							new Point(10,10),
+							null,
+							new Point(20,30))
+    };
+
+    public static void main(String[] args){
+
+    	Solution[] s = CIRCLE;
+    	Point[] p = {new Point(2,2), new Point(20,20)};
+    	Rectangle psRegion = new Rectangle(-40,-40,90,90);
+	final SolutionBorder points = PSMapCalculator.findBorder(p[0], p[1], s[0], s[1], psRegion);
+	
+	
+	System.out.println("found " + points.size() + " points");
+	for (Point pt : points){
+	    System.out.println(pt);
+	}
+
+	Set<SolutionBorder> borders = new HashSet<SolutionBorder>();
+	borders.add(points);
+	display(psRegion, borders,null);
+    }
+
+
+
+
+    public static void display(Rectangle psRegion, Set<SolutionBorder> borders, PSMap psmap){
+
+	JFrame f = new JFrame("PSMap visualizer");
+
+	f.setLayout(new BorderLayout());
+	MyCanvas canvas = new MyCanvas(borders,psRegion,psmap);
+	f.add(canvas,BorderLayout.CENTER);
+
+	BorderSelector bs = new BorderSelector(borders,canvas);
+	f.add(bs, BorderLayout.EAST);
+
+
+	f.addWindowListener ( new WindowAdapter () {
+		public void windowClosing ( WindowEvent evt )
+		{
+			System.exit(0);
+		}
+	});
+
+	f.setSize(1100,900);
+	f.setVisible(true);
+
+
+    }
+
+
+    private static class BorderSelector extends JPanel{
+	/**
+		 *
+		 */
+		private static final long serialVersionUID = 1L;
+	public static final String BORDER = "border";
+	public static final String FULLVIEW = "fullview";
+	public static final String PSMAPVIEW = "psmapView";
+	
+	public static final Object AVERAGE_INTERSECT = "avgIntersect";
+	public BorderSelector(Set<SolutionBorder> borders, ActionListener listener){
+	    setLayout(new GridLayout(0,1));
+
+	    JCheckBox fullView = new JCheckBox("full view");
+	    fullView.putClientProperty(FULLVIEW,Boolean.TRUE);
+	    fullView.addActionListener(listener);
+	    add(fullView);
+	    
+	    JCheckBox psmapView = new JCheckBox("PS Map view");
+	    psmapView.putClientProperty(PSMAPVIEW,Boolean.TRUE);
+	    psmapView.addActionListener(listener);
+	    add(psmapView);
+	    
+	    add(new JSeparator());
+
+	    JCheckBox avgInt = new JCheckBox("avg intersect");
+	    avgInt.putClientProperty(BorderSelector.AVERAGE_INTERSECT,Boolean.TRUE);
+	    avgInt.addActionListener(listener);
+	    add(avgInt);
+	    add(new JSeparator());
+
+
+	    for (SolutionBorder border : borders){
+		JCheckBox box = new JCheckBox("<html>" + border.getSolution().toString() + " vs<br>" + border.getNeighborSolution().toString()+"</html>");
+		box.putClientProperty(BORDER, border);
+		box.addActionListener(listener);
+		add(box);
+	    }
+	}
+    }//end class BorderSelector
+
+
+    private static class MyCanvas extends JPanel implements ActionListener{
+    	/**
+		 *
+		 */
+		private static final long serialVersionUID = 1L;
+		private Set<SolutionBorder> borders;
+    	private Rectangle region;
+	private Map<SolutionBorder,Boolean> borderStatus = new HashMap<SolutionBorder,Boolean>();
+	private boolean fullview = false;
+	private boolean psmapView = false;
+	private boolean averageIntersect = false;
+	private int scale;
+	private int offset;
+	private PSMap psmap;
+
+	private Color[] colors = new Color[]{Color.red, Color.blue, Color.gray, Color.black, Color.magenta, Color.orange};
+	
+	@Override
+	    public void actionPerformed(ActionEvent ev){
+	    //JComponent comp = (JComponent)ev.getSource();
+		JCheckBox comp = (JCheckBox) ev.getSource();
+		
+	    if (comp.getClientProperty(BorderSelector.FULLVIEW) != null){
+			fullview = comp.isSelected();//!fullview;
+		}
+	    else if(comp.getClientProperty(BorderSelector.PSMAPVIEW) != null){
+			psmapView = comp.isSelected();//!psmapView;
+		}
+		else{
+
+			SolutionBorder border = (SolutionBorder)comp.getClientProperty(BorderSelector.BORDER);
+			if (border != null){
+			    //borderStatus.put(border, !borderStatus.get(border));
+				borderStatus.put(border, comp.isSelected());
+			}
+	    }
+
+	    if (comp.getClientProperty(BorderSelector.AVERAGE_INTERSECT) != null){
+	    	averageIntersect = !averageIntersect;
+	    }
+	    repaint();
+	}
+
+
+
+
+	public MyCanvas(Set<SolutionBorder> b, Rectangle r, PSMap p){
+	    init(b,r,p);
+	}
+	private void init(Set<SolutionBorder> b, Rectangle r, PSMap psmap){
+	    this.borders = b;
+	    for (SolutionBorder border : borders){
+		borderStatus.put(border, Boolean.FALSE);
+	    }
+
+	    this.region = r;
+	    this.scale = 5;
+	    this.offset = Math.max(0,Math.max(-region.x,-region.y))+10;
+	    this.psmap = psmap;
+	
+	}
+	@Override
+    public void paintComponent(Graphics g){
+	    super.paintComponent(g);
+
+	    if (fullview){
+		doFullView(g);
+	    }
+	    else if(psmapView){
+	    	doPsmapView(g);
+	    }
+	    else{
+	    	doBorderView(g);
+	    }
+
+	    g.setColor(Color.black);
+	    g.drawRect(scale*(region.x+offset), scale*(region.y+offset), scale*region.width, scale*region.height);
+	}
+
+	private void doPsmapView(Graphics g) {
+		if (this.psmap == null) return;
+			
+		int nextNewColor = 0;
+		Map<Solution, Color> solutionColor = new HashMap<Solution, Color>();
+		for (Map.Entry<ProblemInstance, Solution> entry : psmap.entrySet()){
+			Point p = entry.getKey().getPoint();
+			Solution s = entry.getValue();
+			Color c = solutionColor.get(s);
+			if (c == null){
+				c = colors[nextNewColor];
+				nextNewColor = (nextNewColor + 1) % colors.length;
+				solutionColor.put(s,c);
+			}
+			drawPoint(g,p,c);
+		}
+		
+	}
+
+
+
+
+	private void doFullView(Graphics g){
+
+	    //we'll compare the solutions contained in the first SolutionBorder we find
+	    SolutionBorder border = null;
+	    for(Map.Entry<SolutionBorder,Boolean> entry : borderStatus.entrySet()){
+			if (entry.getValue() == true){
+			    border = entry.getKey();
+			    break;
+			}
+	    }
+
+	    if (border == null) {
+			return;
+		}
+
+	    Solution solA = border.getSolution();
+	    Solution solB = border.getNeighborSolution();
+
+	    Set<Point> blackPoints = new HashSet<Point>();
+	    for (int heightI = 0; heightI < region.height; heightI++){
+			for (int widthI = 0; widthI < region.width; widthI++){
+			    Color color;
+			    Point p = new Point(region.x + widthI, region.y + heightI);
+			    if (solA.isBetterThan(solB,p)){
+				color = Color.green;
+				drawPoint(g,p,color);
+			    }
+			    else if (solB.isBetterThan(solA,p)){
+				color = Color.red;
+				drawPoint(g,p,color);
+			    }
+			    else{
+				blackPoints.add(p);
+			    }
+
+
+			}//end width
+	    }//end heightI
+
+	    //draw black points last so they appear on top
+	    for (Point p : blackPoints){
+		drawPoint(g,p,Color.black);
+	    }
+
+	    //draw fixed points
+	    for (Point p : solA.getFixedPoints()){
+		if (p != null){
+		    g.setColor(Color.black);
+		    g.fillOval(convert(p.x), convert(p.y), 4,4);
+		}
+	    }
+
+	}
+
+	private int convert(int i){
+	    return scale*(i+offset);
+	}
+
+	private void drawPoint(Graphics g,Point p, Color color){
+	    g.setColor(color);
+	    g.drawOval(convert(p.x), convert(p.y), 2,2);
+	}
+
+	private void doBorderView(Graphics g){
+	    
+	    int colorI = 0;
+
+	    List<SolutionBorder> selectedBorders = new ArrayList<SolutionBorder>();
+	    for (SolutionBorder cpoints : this.borders){
+			if (borderStatus.get(cpoints)){ //if this one is turned on
+				selectedBorders.add(cpoints);
+			}
+	    }
+
+//	    List<BorderIntersection> bInts = new ArrayList<BorderIntersection>();
+//	    for (int i = 0; i < selectedBorders.size(); i++){
+//	    	for (int j = i+1; j < selectedBorders.size(); j++){
+//	    		bInts.addAll(BorderIntersection.getIntersections(selectedBorders.get(i),selectedBorders.get(j)));
+//	    	}
+//	    }
+
+	    Set<BorderIntersection> bInts = PSMapCalculator.findBorderIntersections(selectedBorders);
+	    
+	    //draw regular points
+	    for (SolutionBorder border : selectedBorders){
+	    	for (Point p : border){
+	    		//draw regular point
+				drawPoint(g,p,colors[colorI]);
+				colorI = (colorI + 1) % colors.length;
+	    	}
+	    }
+
+
+	    for (BorderIntersection b : bInts){
+	    	g.setColor(Color.black);
+	    	if (this.averageIntersect){
+	    		g.setColor(Color.black);
+	    		g.fillOval(convert(b.intersectionPoint.x),convert(b.intersectionPoint.y),4,4);
+	    	}
+	    	else{
+
+	    		for (Point p : b.intersectionPoints){
+	    			g.fillOval(convert(p.x),convert(p.y),4,4);
+	    		}
+	    	}
+
+	    }//end for each BorderIntersection
+
+
+	}//end method doBorderView
+    }//end class MyCanvas
+
+}

@@ -1,0 +1,146 @@
+package holder.ideal;
+
+import holder.PSMap;
+import holder.ProblemInstance;
+import holder.ProblemInstanceMultiUnknown;
+import holder.Solution;
+import holder.Solver;
+import holder.log.MyLogger;
+import holder.tsp.TSPSolver;
+import holder.util.Util;
+import holder.vis.Visualizer;
+
+import java.awt.Point;
+import java.awt.Rectangle;
+import java.io.File;
+import java.util.ArrayList;
+
+public class IdealPSMapper{
+
+	private static final long MAX_MILLS_BEWTEEN_SAVES = 5 * 60 * 1000; //5 minutes
+	private File incrementalSaveFile = null;
+	private boolean dirty = false;
+	private long lastSave = -1;
+	
+	
+	public void setIncrementalSaveFile(File f){
+		this.incrementalSaveFile = f;
+		
+	}
+	
+	
+	/**
+	 * @param args
+	 */
+	public static void main(String[] args) {
+		Point[] four = new Point[]{new Point(-20,-20), new Point(-5, -5), new Point(0, 10), new Point(-20, 5)};
+		Point[] nine = new Point[]{new Point(-20,-20), new Point(-5, -5), new Point(0, 10), new Point(-20, 5),
+					  			  new Point(40,5), new Point(-30, 20), new Point(-20, 30), new Point(30,20),
+					  			  new Point(45,-30)};
+		
+		IdealPSMapper ideal = new IdealPSMapper();
+		
+		
+		PSMap psmap = ideal.generatePSMap(new Rectangle(-40,-40,90,90),
+										  new TSPSolver(),
+										  four );
+
+		Visualizer v = new Visualizer();
+		v.setVisible(true);
+		v.display(psmap.getProblemSpace(), psmap.borders, psmap, "IdealPSMapper test");
+
+		//File dataDir = Util.DATA_DIR;
+		//Util.savePSMap(psmap, new File(dataDir, "psmap-test.ser"));
+		
+	}
+
+	//map save functionality adapted from http://www.javafaq.nu/java-example-code-193.html
+	public PSMap generatePSMap(Rectangle psRegion, Solver solver, Point ... knownLocations){
+		PSMap psmap;
+		
+		File ifn = incrementalSaveFile;//==null?"null":incrementalSaveFile.getAbsolutePath();
+		System.out.println("PSMap.generatePSMap: incrementalSaveFile = " + ifn);
+	
+		if (incrementalSaveFile != null && incrementalSaveFile.exists()){
+			log("IdealPSMapper.generatePSMap: loading previous incremental save file from " + incrementalSaveFile.getAbsolutePath());
+			psmap = Util.loadPSMap(incrementalSaveFile);
+			log("IdealPSMapper.generatePSMap: loaded " + psmap.size() + " previously computed instances from " + incrementalSaveFile.getAbsolutePath());
+			log("IdealPSMapper.generatePSMap: using fixed points in file");
+			ArrayList<Point> fixedPointsFromIncFile = psmap.getFixedPoints();
+			knownLocations = fixedPointsFromIncFile.toArray(new Point[fixedPointsFromIncFile.size()]);
+		}
+		else{
+			log("IdealPSMapper.generatePSMap: No increment file found.  starting from scratch");
+			psmap = new PSMap();
+			dirty = true;
+			doIncrementalSave(psmap); //doing this one to find out quickly if saving is a problem
+		}
+		lastSave = System.currentTimeMillis();
+				
+		psmap.markStart();
+		psmap.setProblemSpace(new Rectangle(psRegion));
+		
+		log("IdealPSMapper.generatePSMap: solving " + psmap.getProblemSpace().height*psmap.getProblemSpace().width + " problem instances");
+		
+		for (int heightI_2 = 0; heightI_2 < psmap.getProblemSpace().height; heightI_2++){
+		
+			
+			
+			for (int heightI = 0; heightI < psmap.getProblemSpace().height; heightI++){			
+		    
+				log("IdealPSMapper.generatePSMap:heightI_2, I = " + heightI_2 + ", " + heightI);
+				
+				for (int widthI_2= 0; widthI_2 < psmap.getProblemSpace().width; widthI_2++){
+				    for (int widthI = 0; widthI < psmap.getProblemSpace().width; widthI++){
+			
+						Point varP = new Point(widthI + psmap.getProblemSpace().x, heightI + psmap.getProblemSpace().y);
+						Point varP_2 = new Point(widthI_2 + psmap.getProblemSpace().x, heightI_2 + psmap.getProblemSpace().y);
+						
+						ProblemInstance pi = new ProblemInstanceMultiUnknown(new Point[]{varP,varP_2}, knownLocations);
+						if (!psmap.containsKey(pi)){
+							Solution solution = solver.getSolution(pi);
+							psmap.put(pi, solution);
+							dirty = true;
+						}
+				    
+						//incremental save
+						if ( (System.currentTimeMillis() - lastSave) > MAX_MILLS_BEWTEEN_SAVES ){
+							doIncrementalSave(psmap);
+						}
+				    }//widthI
+				}//widthI_2
+			    
+			}//heightI
+			
+			if (heightI_2+1==psmap.getProblemSpace().height || heightI_2 > 0 && heightI_2 % 10 == 0){
+				log("IdealPSMapper.generatePSMap:  completed " + (heightI_2+1) + " of " + psmap.getProblemSpace().height + " rows");
+				System.out.println("IdealPSMapper.generatePSMap:  completed " + (heightI_2+1) + " of " + psmap.getProblemSpace().height + " rows");
+			}
+			
+		}//heightI_2
+		
+		
+		psmap.markEnd();
+		return psmap;
+	}
+
+	private void doIncrementalSave(PSMap partialMap){
+		if (incrementalSaveFile != null && dirty){
+			Util.savePSMap(partialMap, incrementalSaveFile);
+			lastSave = System.currentTimeMillis();
+			log("IdealPSMapper.doIncrementalSave: saved " + partialMap.size() + " instances  to " + incrementalSaveFile.getAbsolutePath());
+		}
+	}
+
+	public void deleteIncrementalFile() {
+		if (incrementalSaveFile != null){
+			incrementalSaveFile.delete();
+		}
+	}
+
+	
+	
+	private void log(String s){
+		MyLogger.getInstance().info(s);
+	}
+}

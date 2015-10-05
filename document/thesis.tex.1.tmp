@@ -1,0 +1,108 @@
+\documentclass[12pt]{report}
+
+\usepackage{multirow}
+\usepackage{doublespace}
+\usepackage{csmthesis}
+\usepackage{aaai-bib}
+\usepackage[round,authoryear]{natbib} % for citation style
+
+%Place content-specific packages
+\usepackage{times}
+\usepackage{helvet}
+\usepackage{courier}
+%\usepackage{epsfig}
+\usepackage{graphicx}
+%\usepackage{subfigure}
+
+%removing this because this template defines \comment{} as a command
+%\usepackage{verbatim} % for comment environment
+
+%\usepackage{array} % for table m attribute
+\usepackage{amsmath} % for split, align in equation env
+\usepackage{caption}
+%\usepackage{xspace}
+%\usepackage[leqno]{amsmath}
+%\usepackage{amssymb}
+%\usepackage{dsfont}
+
+%\bibliographystyle{mlapa}
+
+\usepackage{geometry}
+%\geometry{verbose, letterpaper, dvips, tmargin=1in, lmargin=1.6in, rmargin=0.9in, bmargin=1in, total={6in,9in}, includeheadfoot, headsep=12pt}
+\geometry{verbose, letterpaper, dvips, tmargin=1in, lmargin=1.6in, rmargin=0.9in, bmargin=1in, total={6in,9in}, headsep=12pt}
+
+\newcommand{\etal}{et al.\xspace}
+\newcommand{\eg}{e.g.,\xspace}
+\newcommand{\comment}[1]{}
+
+
+\def\newnot#1{\label{#1}}
+
+\def\ni{\noindent}
+\newcommand{\header}[1]{\noindent \bf{#1}\rm \\ \ni }
+\input{psfig.tex}
+
+%%Items repeated throughout the thesis
+\newcommand{\thesistitle}{Rapid Adaptation in Real-time Systems through Solution Space Analysis}
+\newcommand{\fullname}{Robert H. Holder, III}
+
+\begin{document}
+\title{{\bf \thesistitle{}}}
+\author{\fullname{}}
+\tolerance=1000
+\newpage
+\include{approvalsheet}
+\newpage
+\include{curriculumvitae}
+\newpage
+\include{abstract}
+\newpage
+\include{titlepage}
+\newpage
+\include{copyright}
+
+%\frontmatter
+\pagenumbering{roman}
+
+\newpage
+\setcounter{page}{2}
+\cleardoublepage
+\newpage
+\include{dedication}
+\cleardoublepage
+\include{acknowledgment}
+\cleardoublepage
+\tableofcontents
+\cleardoublepage
+\listoffigures
+\cleardoublepage
+\listoftables
+\cleardoublepage
+
+%\mainmatter
+\pagenumbering{arabic}
+\pagestyle{myheadings}
+\markright{}
+
+\include{chapter-Intro}
+\include{chapter-Background}
+\include{chapter-PSAUtilization}
+\include{chapter-PSAApproximation}
+\include{chapter-EvalInTestDomains}
+\include{chapter-Applications}
+\include{chapter-FutureWork}
+\include{chapter-Conclusion}
+\include{chapter-Framework}
+\cleardoublepage
+\appendix
+\include{sampleAppendix}
+\cleardoublepage
+
+\thispagestyle{plain}
+\bibliographystyle{aaai}
+\bibliography{thesis}
+
+%final blank page per formatting requirements
+\newpage
+
+\end{document}

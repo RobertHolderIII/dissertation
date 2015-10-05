@@ -1,0 +1,49 @@
+package holder.ps;
+
+import java.awt.Point;
+import java.util.HashSet;
+import java.util.LinkedList;
+
+public class SolutionBorder extends HashSet<Point>{
+    /**
+	 *
+	 */
+	private static final long serialVersionUID = 1L;
+	private Solution solution;
+	private Solution neighborSolution;
+	private LinkedList<Point> borderTrace = new LinkedList<Point>();
+
+	public LinkedList<Point> getBorderTrace() {
+		return borderTrace;
+	}
+
+    @Override
+    public boolean add(Point p){
+    	throw new UnsupportedOperationException("users should use add(Point,boolean) so that points are added to the internal linked list");
+    }
+
+    public boolean add(Point p, boolean addAtEnd){
+    	boolean didAdd = super.add(p);
+    	if (didAdd){
+    		if(addAtEnd) {
+				borderTrace.addLast(p);
+			} else {
+				borderTrace.addFirst(p);
+			}
+    	}
+    	return didAdd;
+    }
+
+	public SolutionBorder(Solution sol, Solution neighbor){
+	this.solution = sol;
+	this.neighborSolution = neighbor;
+    }
+
+    public Solution getSolution(){
+	return solution;
+    }
+
+    public Solution getNeighborSolution(){
+	return neighborSolution;
+    }
+}

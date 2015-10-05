@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="psmap" default="help" basedir=".">
+
+  <property name="class.dir" value="classes" />
+  <property name="src.dir" value="src" />
+  <property name="lib.dir" value="lib" />
+
+  <target name="help">
+    <echo>insert help stuff here</echo>
+  </target>
+
+  <target name="init">
+		<mkdir dir="${class.dir}" />
+
+		<path id="javac.classpath">
+			<pathelement path="${class.dir}" />
+			<pathelement path="${lib.dir}/or124.jar" />
+			<pathelement path="${lib.dir}/commons-cli-1.2.jar" />
+			<pathelement path="${lib.dir}/commons-collections-3.2.1.jar"/>
+			<pathelement path="${lib.dir}/commons-exec-1.1.jar"/>
+			<pathelement path="${lib.dir}/jmathplot.jar"/>
+			<pathelement path="${lib.dir}/libsvm.jar"/>
+			<pathelement path="${lib.dir}/weka.jar"/>
+			<pathelement path="${lib.dir}/commons-io-2.3.jar"/>
+			<pathelement path="${lib.dir}/commons-lang-2.4.jar"/>
+			
+			
+		</path>
+	</target>
+
+
+  <target name="compile" depends="init" description="Compile all Java">
+		<javac target="1.6" source="1.6" srcdir="${src.dir}" destdir="${class.dir}" debug="true" debuglevel="lines,vars,source">
+			<classpath refid="javac.classpath" />
+		</javac>
+  </target>
+
+  <target name="clean" description="removes compiled code">
+    <delete failonerror="false">
+      <fileset dir="${class.dir}" includes="**/*"/>
+    </delete>
+  </target>
+
+  <target name="solution-border-test" depends="compile" description="tests ability to find border between two solution">
+    <java classname="holder.ps.SolutionBorderTest" fork="true">
+      <classpath refid="javac.classpath" />
+    </java>
+  </target>
+
+  <target name="psmap" depends="compile" description="runs psmap generator">
+    <java classname="holder.ps.PSMapCalculator" fork="true">
+      <classpath refid="javac.classpath" />
+    </java>
+  </target>
+
+  <target name="active-learning" depends="compile" description="run active learning approximation">
+    <java classname="holder.sc.BatchSC" fork="true">
+      <classpath refid="javac.classpath" />
+      <arg line="-approx holder.sc.PSMapSolveOrApprox"/>
+      <arg line="-ssu holder.sc.DistanceBasedSolutionScoreUpdater"/>
+      <arg line="-D alpha=0.2"/>
+      <arg line="-pollingRadius 15"/>
+      <arg line="-ideal &quot;C:/Documents and Settings/HOLDERH1/My Documents/umbc/dissertation/data/v4/ideal_maps/smooth-psmap-tsp-100-R-instance0.ser&quot;"/>
+      <jvmarg value="-Xdebug" />
+      <jvmarg value="-Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5432" />
+    </java>
+  </target>
+
+  <target name="knapsack-ideal-debug" depends="compile" description="run knapsack ideal psmap generation">
+    <java classname="holder.knapsack.BatchK" fork="true">
+      <classpath refid="javac.classpath" />
+      <jvmarg value="-Xdebug" />
+      <jvmarg value="-Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5432" />
+    </java>
+  </target>
+  
+   <target name="knapsack-ideal" depends="compile" description="run knapsack ideal psmap generation">
+    <java classname="holder.knapsack.BatchK" fork="true">
+      <classpath refid="javac.classpath" />
+       <jvmarg value="-Xmx512m" />
+    </java>
+  </target>
+
+  <target name="elevator-ideal" depends="compile" description="run elevator ideal psmap generation">
+    <java classname="holder.elevator.IdealMapper" fork="true">
+       <classpath refid="javac.classpath" />
+    </java>
+  </target>
+
+</project>
