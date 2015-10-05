@@ -1,0 +1,52 @@
+\documentclass[letterpaper]{article}
+\usepackage{aaai}
+\usepackage{times}
+\usepackage{helvet}
+\usepackage{courier}
+
+\usepackage{verbatim} % for comment environment
+\usepackage{graphicx}
+
+
+\begin{document}
+
+\title{real-time adaptation; plan library; problem space analysis}
+
+\author{Robert Holder, Marie desJardins, and Tim Finin\\University of Maryland\
+ Baltimore County\\\{holder1,mariedj,finin\}@umbc.edu}
+
+
+
+\maketitle
+
+\begin{abstract}
+\end{abstract}
+
+
+%==============================================
+\section{Introduction}
+
+
+
+\section{
+
+
+
+
+\begin{comment}
+introduction
+
+psmap approximation
+  necesity
+  basic idea
+active sampling
+  idea that strategic sampling can reduce the amount of samples required for classification
+active learning
+  specific case of active sampling in which the learning algorithm determines the most strategic samples
+  basic idea is that the algorithm assesses the space of 
+application to psmap approximation
+\end{comment}
+\end{document}
+
+
+

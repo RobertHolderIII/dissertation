@@ -1,0 +1,22 @@
+\documentclass[letterpaper]{article}
+\usepackage{aaai}
+\usepackage{times}
+\usepackage{helvet}
+\usepackage{courier}
+
+\usepackage{verbatim} % for comment environment
+\usepackage{graphicx}
+
+
+\begin{document}
+
+Sampling with a large polling radius is ineffective due to the empiracal characteristic of most domains that limited amount of imformation that can be inferred from the solutions of far-off problem instances.  This can be seen by observing ideal PS Maps, many of for which the size of the regions of homogeneous solutions is relatively small.  The effectiveness of the polling radius is dependant upon these homogeneous regions, and thus the limit of their effectiveness to small distances expectantly mirrors the small regions that comprise the set of homogenious solutions.
+
+Because of the limited radius of problem instances for which one can expect a solution to accurately reflect the solution of neighboring problem instances, this technique is likely only feasible for applications in which a very high sample rate can be used.
+
+
+The basic SC algorithm assigns a solution to a unsolved problem instance by polling the solutions of solved problem instances within a given radius.  The SC+AL algorithm solves a random sample of problem instances, however
+
+First experiment defines unanimous as only one solution type in the radius, in which case that solution is assigned to the problem instance; no votes as no solution types in the polling radius, in which case the problem instance is solved; ambiguous as more than one solution in the polling radius, in which case the solution with the higher distance-weighted score is selected; and default in which case the problem instance is solved, or if the allocation of solved problem instances has been reached, then the polling radius is expanded until a plurality is reached.  If the polling radius emcompasses all the points, then the candidate solutions are compared.
+
+The second experiment defines an alternate handling of the ambiguous case:  if the score of the solutions in the polling radius exceeds some threshold fraction of the sum score of all the solutions, then it is considered a landslide, and that solution is assigned to the problem instance.  If no solution solution score exceeds the threshold, then the problem instance is solved.  For example, if a solution ``blue'' has a score of 15, and the sum of all scores is 20, then the unsolved problem instance would be assigned the blue solution for any landslide threshold .75 (15/20) or lower.

@@ -1,0 +1,48 @@
+\documentclass[letterpaper]{article}
+\usepackage{aaai}
+\usepackage{times}
+\usepackage{helvet}
+\usepackage{courier}
+
+\usepackage{verbatim} % for comment environment
+\usepackage{graphicx}
+
+
+\begin{document}
+
+\title{real-time adaptation; plan library; problem space analysis}
+
+\author{Robert Holder, Marie desJardins, and Tim Finin\\University of Maryland\
+ Baltimore County\\\{holder1,mariedj,finin\}@umbc.edu}
+
+
+
+\maketitle
+
+\begin{abstract}
+\end{abstract}
+
+
+%==============================================
+\section{Introduction}
+
+We modified our SC (sampling and classification) technique to utilize active sampling rather than random sampling when determining problem instances to solve.  We defined a parameter, alpha, to represent the fraction of sample problem instances that will be initially solved.  The remaining sample problem instances are solved after evaluating the near neighbors of an unsolved problem instance. If the neighbors indicate little or no ambiguity when approximating the unsolved instance, then the problem instance is assigned a solution as in SC.  However, if the neighbor do indicate ambiguity, then the problem instance is solved traditionally, assuming the number of problem instances allowed to be solved as indicated by the sample rate is not exceeded.  In our algorithm, abiguity refers to either no nearly solved instances or two or more solutions with scores whose ratio is less than 2:1.
+
+\section{Experiment}
+We approximated fifteen maps using SC+AS (sampling and classification with active sampling) at alpha levels from 0.1 to 0.9 at each sample rate from .001 to .010.  The evaluation consists of the average percent difference between the solutions in the approximated map and those in the ideal map, labeled the Percent Utility Loss.   Finally, each approximation was run ten times and average of the Percent Utility Loss was recorded as the final evaulation.
+
+\section{Results}
+Intuitively, we expected that utilizing a more strategic means of selecting problem instances to solve would decrease the average utility loss of the approximated maps.  The results validate this, demonstrating a continual improvement in map approximation as alpha (the fraction of problem instances selected randomly to be solved) descreases.
+
+
+
+\section{Analysis}
+Interestingly, while both the switch to a distance-based metric and a active sampling strategy both improve performance, the improvement contributed by the distance-based metric is much greater.
+
+\section{Future Work}
+
+It seems reasonable that the improvement in performance would plateau even as alpha descreases.  One possibility is that there is a critical mass of intial problem instances required to support the more informed selection of future problem instances to solve.  How to determine what that critical mass is is unclear.
+
+Unlike traditional active learning approaches, which tend to evaluate all unknown labels and determine the appropriate queries, our approach queries for unknown labels as soon as one that meets criteria of ambiguity is encountered.  A potential improvement to our algorithm would be to consider all unknown labels before making queries, and optimizing the tradeoff between the number of queries (higher number of queries results in a faster algorithm) and the number of phases (reserving some queries for future phases allows pervious queries to be considered when choosing subsequent queries, resulting in a more accurate algorithm).
+
+\end{document}
