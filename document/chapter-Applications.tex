@@ -15,9 +15,9 @@ Thus, plan solution spaces have homogeneous solution regions that the algorithms
 
 As  seen with SBE and its skeletal generation of solution region boundaries, a TSP's solution boundaries are defined by each pairwise set of unique solutions discovered by an initial sample.  Fewer unique solutions increases the number of problem instances per solution; that is, it increases the size of the solution regions.  At a given sample rate, the larger solution regions create a greater likelihood that  a random sample will include the points necessary to identify the unique solutions within the problem space.
 
-Other problem domains, such as the elevator domain, do not have explicit objective functions, but do have problem configurations that can serve the same purpose.  Within the TSP domain, the number of fixed cities impacts the number of possible unique solutions, a fraction of which are represented in the problem space as solution regions.  In the knapsack domain, the set of static items impacts the number of possible unique solutions as well.  As the value of a variable item increases, it eventually supersedes a  static item, resulting in a new solution.  For example, every problem instance in which the variable item is ``worse'' than the ``worst'' static item will have a solution that includes the static item rather than the variable item.\footnote{The evaluation of ``worse'' and ``worst'' depends on the heuristic used by the solver, but one example is the ratio of weight to value.}  The problem instances for which the variable item is ``better'' than the static item will result in a distinct solution.  Each static item presents an opportunity for a new solution. Thus, increasing the number static items that are present in the domain results in  more distinct solutions and thereby more solutions regions will exist.  
+Other problem domains, such as the elevator domain, do not have explicit objective functions, but do have problem configurations that can serve the same purpose.  Within the TSP domain, the number of fixed cities affects the number of possible unique solutions, a fraction of which are represented in the problem space as solution regions.  In the knapsack domain, the set of static items affects the number of possible unique solutions as well.  As the value of a variable item increases, it eventually supersedes a  static item, resulting in a new solution.  For example, every problem instance in which the variable item is ``worse'' than the ``worst'' static item will have a solution that includes the static item rather than the variable item.\footnote{The evaluation of ``worse'' and ``worst'' depends on the heuristic used by the solver, but one example is the ratio of weight to value.}  The problem instances for which the variable item is ``better'' than the static item will result in a distinct solution.  Each static item presents an opportunity for a new solution. Thus, increasing the number of static items that are present in the domain results in  more distinct solutions and thereby more solution regions will exist.  
 
-In the elevator domain, the number of blocks of floors impacts the number of solution regions.  In general, the number of steps for a passenger to move from its starting to final destination is a function of the floor block that contains its starting location.  If abstracted as previously described, there is potentially little difference in the solution regardless of where in the floor block the passenger starts, which itself suggests an identical solution for several starting locations.  The greater number of floor blocks thereby leads to a greater number of solution regions.
+In the elevator domain, the number of blocks of floors affects the number of solution regions.  In general, the number of steps for a passenger to move from its starting to final destination is a function of the floor block that contains its starting location.  If abstracted as previously described, there is potentially little difference in the solution regardless of where in the floor block the passenger starts, which itself suggests an identical solution for several starting locations.  The greater number of floor blocks thereby leads to a greater number of solution regions.
 
 The general conclusion is that the static characteristics have a direct impact on the number of homogeneous solution regions.  This can be observed in the previous examples in which the static characteristics tend to serve as an indicator of a threshold that variable features may cross and create a distinct solution.
 
@@ -63,7 +63,7 @@ A more comprehensive view of this tradeoff is shown in Figures \ref{fig:timing-k
 \begin{figure}
 \begin{center}
 \includegraphics[scale=0.75]{pics/timing-k-2d-sc.eps}
-\caption{Relationship between SC appoximation computation time and map quality for two-dimensional knapsack domain.}
+\caption{Relationship between SC approximation computation time and map quality for a two-dimensional knapsack domain.}
 \label{fig:timing-k-2d-sc}
 \end{center}
 \end{figure}
@@ -72,7 +72,7 @@ A more comprehensive view of this tradeoff is shown in Figures \ref{fig:timing-k
 \begin{figure}
 \begin{center}
 \includegraphics[scale=0.75]{pics/timing-k-2d-al.eps}
-\caption{Relationship between SC+AL appoximation computation time and map quality for two-dimensional knapsack domain.}
+\caption{Relationship between SC+AL approximation computation time and map quality for a two-dimensional knapsack domain.}
 \label{fig:timing-k-2d-al}
 \end{center}
 \end{figure}
@@ -80,7 +80,7 @@ A more comprehensive view of this tradeoff is shown in Figures \ref{fig:timing-k
 \begin{figure}
 \begin{center}
 \includegraphics[scale=0.75]{pics/timing-k-2d-sss.eps}
-\caption{Relationship between SSS appoximation computation time and map quality for two-dimensional knapsack domain.}
+\caption{Relationship between SSS approximation computation time and map quality for a two-dimensional knapsack domain.}
 \label{fig:timing-k-2d-sss}
 \end{center}
 \end{figure}
@@ -89,7 +89,7 @@ A more comprehensive view of this tradeoff is shown in Figures \ref{fig:timing-k
 \begin{figure}
 \begin{center}
 \includegraphics[scale=0.75]{pics/timing-k-2d-svm.eps}
-\caption{Relationship between SVM appoximation computation time and map quality for two-dimensional knapsack domain.}
+\caption{Relationship between SVM approximation computation time and map quality for a two-dimensional knapsack domain.}
 \label{fig:timing-k-2d-svm}
 \end{center}
 \end{figure}
@@ -97,7 +97,7 @@ A more comprehensive view of this tradeoff is shown in Figures \ref{fig:timing-k
 \begin{figure}
 \begin{center}
 \includegraphics[scale=0.75]{pics/timing-k-2d-svmsbe.eps}
-\caption{Relationship between SVM+SBE approximation computation time and map quality for two-dimensional knapsack domain.}
+\caption{Relationship between SVM+SBE approximation computation time and map quality for a two-dimensional knapsack domain.}
 \label{fig:timing-k-2d-svmsbe}
 \end{center}
 \end{figure}
@@ -105,14 +105,14 @@ A more comprehensive view of this tradeoff is shown in Figures \ref{fig:timing-k
 Similar to the knapsack problem,  the elevator domain shows a strong correlation between computation time and utility loss when the more sophisticated algorithms are employed, as shown in Figures \ref{fig:timing-elevator6pass-sc} through \ref{fig:timing-elevator6pass-svmsbe}.  However, even the random SC algorithm in this domain seems to show a tendency towards better performance at high sample rates.
 
 
-It is worth noting the discrete characteristic of several of the maps.  This results from very low variance in utility loss as a function of the discovered solutions.  That is, the set of solutions that the initial sampling discovers tends to determine the overall performance of the approximation algorithm.  This is most evident in the SSS algorithm in which the assignment of the solutions to unsolved problem instances is most directly determined by the set of discovered solutions.  Recall that in SSS, each unsolved problem is assigned a solution by testing each previously discovered solution.  Other approximation algorithms attempt to avoid testing all discovered  the solutions, but, outside of SC, these algorithms still tend to use the information from the set of discovered solutions in a consistent, although not deterministic, manner.
+It is worth noting the discrete characteristic of several of the maps.  This results from very low variance in utility loss as a function of the discovered solutions.  That is, the set of solutions that the initial sampling discovers tends to determine the overall performance of the approximation algorithm.  This is most evident in the SSS algorithm, in which the assignment of the solutions to unsolved problem instances is most directly determined by the set of discovered solutions.  Recall that in SSS, each unsolved problem is assigned a solution by testing each previously discovered solution.  Other approximation algorithms attempt to avoid testing all discovered  the solutions, but, outside of SC, these algorithms still tend to use the information from the set of discovered solutions in a consistent, although not deterministic, manner.
 
-This discrete characteristic appears less in the elevator domain, likely due to the larger number of solutions available in the domain.  Thus, the set of discovered solutions  is more varied.
+This discrete characteristic appears less frequently in the elevator domain, likely due to the larger number of solutions available in the domain.  Thus, the set of discovered solutions  is more varied.
 
 \begin{figure}
 \begin{center}
 \includegraphics[scale=0.75]{pics/timing-elevator6pass-sc.eps}
-\caption{Relationship between SC approximation computation time and map quality for three-dimensional elevator domain.}
+\caption{Relationship between SC approximation computation time and map quality for a three-dimensional elevator domain.}
 \label{fig:timing-elevator6pass-sc}
 \end{center}
 \end{figure}
@@ -120,7 +120,7 @@ This discrete characteristic appears less in the elevator domain, likely due to 
 \begin{figure}
 \begin{center}
 \includegraphics[scale=0.75]{pics/timing-elevator6pass-al.eps}
-\caption{Relationship between SC+AL approximation computation time and map quality for three-dimensional elevator domain.}
+\caption{Relationship between SC+AL approximation computation time and map quality for a three-dimensional elevator domain.}
 \label{fig:timing-elevator6pass-al}
 \end{center}
 \end{figure}
@@ -128,7 +128,7 @@ This discrete characteristic appears less in the elevator domain, likely due to 
 \begin{figure}
 \begin{center}
 \includegraphics[scale=0.75]{pics/timing-elevator6pass-sss.eps}
-\caption{Relationship between SSS approximation computation time and map quality for three-dimensional elevator domain.}
+\caption{Relationship between SSS approximation computation time and map quality for a three-dimensional elevator domain.}
 \label{fig:timing-elevator6pass-sss}
 \end{center}
 \end{figure}
@@ -136,7 +136,7 @@ This discrete characteristic appears less in the elevator domain, likely due to 
 \begin{figure}
 \begin{center}
 \includegraphics[scale=0.75]{pics/timing-elevator6pass-svm.eps}
-\caption{Relationship between SVM approximation computation time and map quality for three-dimensional elevator domain.}
+\caption{Relationship between SVM approximation computation time and map quality for a three-dimensional elevator domain.}
 \label{fig:timing-elevator6pass-svm}
 \end{center}
 \end{figure}
@@ -144,14 +144,14 @@ This discrete characteristic appears less in the elevator domain, likely due to 
 \begin{figure}
 \begin{center}
 \includegraphics[scale=0.75]{pics/timing-elevator6pass-svmsbe.eps}
-\caption{Relationship between SVM+SBE approximation computation time and map quality for three-dimensional elevator domain.}
+\caption{Relationship between SVM+SBE approximation computation time and map quality for a three-dimensional elevator domain.}
 \label{fig:timing-elevator6pass-svmsbe}
 \end{center}
 \end{figure}
 
 %For the elevator domain, I revisit Figure \ref{fig:svmsbe_elevator_12} and assume the best-case online repair fractional utility loss of .065.
 
-This leaves the question of how estimate the expected performance is for a particular sample rate. Recalling that the effectiveness of the algorithms appear to be a function of the number of size of homogeneous solution regions, it may be possible to estimate the number of homogeneous solution regions by examining the  characteristics of the objection function or the problem configuration.  For example, an elevator domain with configuration M=12, N=6, with one slow elevator per block, has approximately two solution regions:  one in which the elevator in the first block picks up the passenger, and one in which the elevator in the second block picks up the passenger.  One might then speculate that the  number of solution regions is approximately $\frac{M}{N}$, assuming one slow elevator per block and zero fast elevators.  Determining the number of solution regions in other domains is potentially less straightforward.  For example, Figure \ref{fig:five_city_tsps} shows PS Maps for several randomly configured DTSPs.  The unique solutions vary from eight to eleven.
+This leaves the question of how to accurately estimate the expected performance is for a particular sample rate. Recalling that the effectiveness of the algorithms appears to be a function of the number of size of homogeneous solution regions, it may be possible to estimate the number of homogeneous solution regions by examining the  characteristics of the objective function or the problem configuration.  For example, an elevator domain with configuration M=12, N=6, with one slow elevator per block, has approximately two solution regions:  one in which the elevator in the first block picks up the passenger, and one in which the elevator in the second block picks up the passenger.  One might then speculate that the  number of solution regions is approximately $\frac{M}{N}$, assuming one slow elevator per block and zero fast elevators.  Determining the number of solution regions in other domains is potentially less straightforward.  For example, Figure \ref{fig:five_city_tsps} shows PS Maps for several randomly configured DTSPs.  The unique solutions vary from eight to eleven.
 
 
 % description of number of unqiue item weights versus number of unique solutions experiment

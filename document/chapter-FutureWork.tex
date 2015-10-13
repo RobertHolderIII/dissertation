@@ -28,7 +28,7 @@ The PS Map map assists in plan library creation by showing the minimum number of
 
 %AAAI08-157 Learning Generalized Plans Using Abstract Counting
 
-\cite{srivastava08generalized}'s work describes the process of transforming a plan specific to a single problem instance into a generalized plan that is appliable to more than one problem instance.  This is similar to the transformation done within the elevator domain testing, although \citeauthor{srivastava08generalized} present a general approach in which operation preconditions are examined, thus formalizing the conditions that can be generalized.  This approach would be likely be applicable when applying my work to additional planning domains.  Within the elevator domain, my approach was to transform steps such as 
+\cite{srivastava08generalized}'s work describes the process of transforming a plan specific to a single problem instance into a generalized plan that is applicable to more than one problem instance.  This is similar to the transformation done within the elevator domain testing, although \citeauthor{srivastava08generalized} present a general approach in which operation preconditions are examined, thus formalizing the conditions that can be generalized.  This approach would be likely be applicable when applying my work to additional planning domains.  Within the elevator domain, my approach was to transform steps such as 
 
 \begin{verbatim}
 move elevator slow0-0 to floor 2
@@ -57,7 +57,7 @@ for each passenger p within range
   elevator slow0-0 picks up passenger p
 \end{verbatim}
 
-The primary result would be to create similar solutions, for which the appropriate axes could create homogeneous solution regions.  This would also assist with reducing the nuber of plans to store in the library.
+The primary result would be to create similar solutions, for which the appropriate axes could create homogeneous solution regions.  This would also assist with reducing the number of plans to store in the library.
 
 \section{Analysis of Problem Configuration and Sample Rate}
 As mentioned in Chapter \ref{ch:application}, the ability to estimate the configuration of the solution region would be helpful in determining the appropriate sample rate to increase the effectiveness of the approximation algorithms.  Future work could entail finding a correlation between problem domain configuration and the sample rate that should be targeted for a good approximation.
@@ -71,7 +71,7 @@ The sampling in my algorithms is across full problem instances; the sampling in 
 
 \section{NASA}
 
-\cite{DBLP:conf/aaai/Smith12} describes a challenge that the Mars Rover scientific team faces in which they must decide on a set of goals for a planner to consider.  There are many constraints to consider that would make for a challenging planning problem, however, the key issue is that the scientists do not have a way to evaluate the tradeoffs between the goals they may consider.  \citeauthor{DBLP:conf/aaai/Smith12} proposes a solution in which scientists are able to consider a variety of plans from which they could get a sense of what goal combinations are feasible.  My work could be suitable for this initial need.  However, the second need that \citeauthor{DBLP:conf/aaai/Smith12} describes is plan explanation, in which scientists could ask why one goal is included in the plan and not another, as well as what-if questions that allow them to explore tradeoffs between their goals.  
+\cite{DBLP:conf/aaai/Smith12} describes a challenge that the Mars Rover scientific team faces in which they must decide on a set of goals for a planner to consider.  There are many constraints to consider that would make for a challenging planning problem; however, the key issue is that the scientists do not have a way to evaluate the tradeoffs between the goals they may consider.  \citeauthor{DBLP:conf/aaai/Smith12} proposes a solution in which scientists are able to consider a variety of plans from which they could get a sense of what goal combinations are feasible.  My work could be suitable for this initial need.  However, the second need that \citeauthor{DBLP:conf/aaai/Smith12} describes is plan explanation, in which scientists could ask why one goal is included in the plan and not another, as well as what-if questions that allow them to explore tradeoffs between their goals.  
 
 A PS Map for a planning domain shows the set of solutions available for a set of potential changes in the problem space.  An interesting extension may be a PS Map that gives information about the set of solutions two steps removed from the current environment.  In principle, this could be accomplished by adding axes to the problem space representing all two-hop changes, similar to a TSP PS Map that considers more  than one new location. However, in more traditional planning domain, it may be possible to exploit the temporal relationship between two-hop changes to create the map more efficiently.
 
