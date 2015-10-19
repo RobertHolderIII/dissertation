@@ -27,7 +27,13 @@ Problem instances contain characteristics that are identical, called \textit{sta
 
 \section{Summary of Contributions}
 
-This dissertation contributes an approach to real-time planning that leverages offline time to generate a plan library.  Chapter \ref{ch:psa} introduces the concept of a PS Map  and describes several novel approximation approaches in order to create the plan library.  I then demonstrate this approach's applicability to multiple domains through experiments in Chapter \ref{ch:evaluation}.  These experiments illustrate that good approximate PS Maps can be obtained from a small number of samples in the problem space.  This dissertation also briefly examines the practical tradeoffs between online and offline planning time in Chapter \ref{ch:application}.  Chapter \ref{ch:future} suggests extentions to this work and concludes the dissertation.
+This dissertation contributes an approach to real-time planning that leverages offline time to generate a plan library.  Chapter \ref{ch:psa} introduces the concept of a Problem-Solution (PS) Map, and describes several novel approximation approaches in order to create the plan library.  I note how the solution spaces of a domain can have homogeneous regions that can be exploited to efficiently find solutions to a large number of problem instances. The most promising algorithms are those that are able to quickly find the borders of the solutions regions.
+
+I then demonstrate this approach's applicability to multiple domains through experiments in Chapter \ref{ch:evaluation}.  These experiments illustrate that good approximate PS Maps can be obtained from a small number of samples in the problem space.  I also demonstrate how creating abstract solutions allows these algorithms to be  utilized in a domain in which the solutions do not form homogeneous regions.
+
+This dissertation also briefly examines practical tradeoffs between online and offline planning time in Chapter \ref{ch:application}.  This includes some timing results and thoughts on choosing a sample rate and the appropriate algorithm. This chapter also revisits the issue of irregular solutions spaces, and discusses reindexing a solution space as a technique to facilitate the use of PS Map approximation algorithms.
+
+Finally, Chapter \ref{ch:future} suggests extensions to this work and concludes the dissertation.
 
 
 
