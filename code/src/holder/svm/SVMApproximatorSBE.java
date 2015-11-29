@@ -49,13 +49,6 @@ public class SVMApproximatorSBE<P extends GenericProblemInstance, S extends Gene
 	public static final String KERNELTYPE = "holder.svm.SVMApproximatorSBE.KERNELTYPE";
 	public static final String SVMTYPE = "holder.svm.SVMApproximatorSBE.SVMTYPE";
 
-	/**
-	 * save original system PrintStream to restore after
-	 * {@link #openOutputStream()} and {@link #closeOutputStream()}
-	 * are done
-	 */
-	private PrintStream sysOut;
-
 	public GenericPSMap<P,S> initialSampleMap;
 	public GenericPSMap<P,S> initialSampleSbeMap;
 

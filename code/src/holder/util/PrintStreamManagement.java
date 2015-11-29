@@ -4,16 +4,15 @@ import java.io.PrintStream;
 
 public class PrintStreamManagement {
 
-	private static PrintStream sysOut;
-	private static OutputStreamValve vOut;
+	private static PrintStream sysOut = System.out;
+	private static OutputStreamValve vOut = new OutputStreamValve(sysOut);
 
 	private static boolean wrapped = false;
 
 	public static void wrapOutputStream(){
 		if (!wrapped){
-			sysOut = System.out;
-			vOut = new OutputStreamValve(sysOut);
 			System.setOut(vOut);
+			wrapped = true;
 		}
 	}
 
@@ -23,14 +22,16 @@ public class PrintStreamManagement {
 	public static void unwrapOutputStream() {
 		if (wrapped){
 			System.setOut(sysOut);
+			wrapped = false;
 		}
 	}
 
 
 	public static void openOutputStream(){
 		if (wrapped){
-			System.err.println("PrintStreamManagement: opening output stream");
 			vOut.openValve();
+			System.err.println("PrintStreamManagement: opening output stream");
+			unwrapOutputStream();
 		}
 	}
 

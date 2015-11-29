@@ -39,7 +39,13 @@ public class GenericAccuracyChecker<P extends GenericProblemInstance, S extends 
 		this.classname = this.getClass().getSimpleName();
 		this.idealMap = idealMap;
 		this.approxMap = approxMap;
-		if (DEBUG){
+		if (this.idealMap == null){
+			throw new IllegalArgumentException("cannot check against null ideal map");
+		}
+		if (this.approxMap == null){
+			throw new IllegalArgumentException("cannot check against null approx map");
+		}
+		if (true){
 			System.out.println(classname + " received ideal ps map with " + idealMap.size() + " entries");
 			System.out.println(classname + " received approx ps map with " + approxMap.size() + " entries");
 
@@ -175,7 +181,7 @@ public class GenericAccuracyChecker<P extends GenericProblemInstance, S extends 
 					total--;
 				}
 				else{
-					fractionUtilityLoss += utilityDiff/idealUtility;
+					fractionUtilityLoss += utilityDiff/Math.abs(idealUtility);
 				}
 
 
