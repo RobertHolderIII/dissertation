@@ -27,9 +27,9 @@ In addition to appropriate indexing, the plans must be abstracted enough to crea
 
 
 \section{Tradeoff with Online Repair}
-These techniques allow a system to find solutions for large numbers of similar problem instances, providing useful information in domains that do not allow for large amounts of replanning time once an incident occurs, but in which there is some time before such an incident.  %In the case of the SBE example, the generation of the PS Map at a sample rate of .004 required $\sim$9 seconds to sample 32 problem instances and complete the map approximation.
+These techniques allow a system to find solutions for large numbers of similar problem instances, providing useful information in domains that do not allow for large amounts of replanning time once an incident occurs, but in which there is some time before such an incident.  However, it is worth noting that in addition to offline version online repair, a system could also choose not to replan at all.  For example, if a system determined that the utility loss of the current solution with respect to the post-event problem instance was tolerable, then it could be reasonable to continue with the current solution.  One could also consider the external costs related to a new plan that isnot explicit in the problem instance.   For example, a new plan could require more resources than the current plan, or there could be a cost in switching plans.  In this case, if the cost of the new plan is greater than the loss from the use of the suboptimal solution, then the system could be justified in not replanning.
 
-Given that the sample rate determines the accuracy of the approximated map, a system would want to use the highest sample rate possible.  In the case where the system knows the expected time until a disruptive event occurs, then this technique could be used as a contract algorithm \citep{Zilberstein99real-timeproblem-solving} -- an algorithm that is given a specific amount of time with which to find a solution -- with a sample rate:
+However, assuming that the system does determine that the overall cost analysis supports replanning, then it is worth considering how best take advantage of the offline time available to prepare for online events.  Given that the sample rate determines the accuracy of the approximated map, a system would want to use the highest sample rate possible.  In the case where the system knows the expected time until a disruptive event occurs, then this technique could be used as a contract algorithm \citep{Zilberstein99real-timeproblem-solving} -- an algorithm that is given a specific amount of time with which to find a solution -- with a sample rate:
 \begin{equation*}
 rate = \frac{time_{\mbox{\itshape offline}}}{time_{inst}*n_{inst}} ,
 \label{eq:tradeoff}
@@ -105,9 +105,25 @@ A more comprehensive view of this tradeoff is shown in Figures \ref{fig:timing-k
 Similar to the knapsack problem,  the elevator domain shows a strong correlation between computation time and utility loss when the more sophisticated algorithms are employed, as shown in Figures \ref{fig:timing-elevator6pass-sc} through \ref{fig:timing-elevator6pass-svmsbe}.  However, even the random SC algorithm in this domain seems to show a tendency towards better performance at high sample rates.
 
 
+
+
+
+
+
+
+
+
+
+
 It is worth noting the discrete characteristic of several of the maps.  This results from very low variance in utility loss as a function of the discovered solutions.  That is, the set of solutions that the initial sampling discovers tends to determine the overall performance of the approximation algorithm.  This is most evident in the SSS algorithm, in which the assignment of the solutions to unsolved problem instances is most directly determined by the set of discovered solutions.  Recall that in SSS, each unsolved problem is assigned a solution by testing each previously discovered solution.  Other approximation algorithms attempt to avoid testing all discovered  the solutions, but, outside of SC, these algorithms still tend to use the information from the set of discovered solutions in a consistent, although not deterministic, manner.
 
-This discrete characteristic appears less frequently in the elevator domain, likely due to the larger number of solutions available in the domain.  Thus, the set of discovered solutions  is more varied.
+A similar effect explains the horizontal clustering apparent in several of the maps.  This clustering is a function of low number of solutions in the space, leading to low numbers of permutations of discovered solutions during the initial sampling stage.  Again, the performance of the algorithms is sensitive to the solutions discovered.  Thus the same permutation tends to lead to similar performance of the algorithm, resulting in clustering at a specific utility loss measure.
+
+
+This discrete characteristic and cluster effect appears less frequently in the elevator domain, likely due to the larger number of solutions available in the domain.  Thus, the set of discovered solutions  is more varied.
+
+
+
 
 \begin{figure}
 \begin{center}

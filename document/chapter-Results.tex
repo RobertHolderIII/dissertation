@@ -40,7 +40,7 @@ The sampling classification (SC) algorithm is a simple algorithm used as an init
 \begin{figure}
 \begin{center}
 \includegraphics[scale=0.4]{pics/100tsp_baseline.eps}
-\caption{Results of applying various approximation algorithms to the 100-city TSP domain.  The dotted line represents the utility loss of the online planner.  The shaded region is the expected loss of DTSP online repair algorithms as suggested by \cite{larsen2000dvrp}.}
+\caption{Results of applying various approximation algorithms to the 100-city TSP domain.  The SBE/SSS line are the results of the SBE and SSS algorithms.  The three SC lines are the results of three executions of the SC algorithm.  SC-distance and SC-distanceSquared are the results of running SC and weighting the voting contribution of each neighbor by its, respectively, distance and distance squared from the unsolved problem instance.  The SC+AL line is the result of the SC+AL algorithm.  As a baseline, the dotted line represents the utility loss of the online planner.  As a secondary baseline, the shaded region is the expected loss of DTSP online repair algorithms as suggested by \cite{larsen2000dvrp}.}
 \label{fig:100tsp_baseline}
 \end{center}
 \end{figure}

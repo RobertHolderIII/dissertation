@@ -64,8 +64,17 @@ SC+bias, SC+Active Learning (SC+AL), and SVM+SBE are more difficult to paralleli
 
 \section{Distributed Planning}
 
-Distributed planning in this sense is the problem of  multiple independent agents working to solve a single problem. 
+Distributed planning in this sense is the problem of  multiple independent agents working to solve a single problem.  Many solutions to distributed planning problems involve agent negotiation resulting in agent-specific plans that contribute to accomplishing an overall task.  This agent negotiation could involve calculation of agent-specific PS Maps.  These PS Maps could take into account potential changes in the environment and provide the mitigation plan.  This would result in a coordinated response to general environmental changes, as all agents  would alter their actions in a manner that is consistent with completing the overall task, without the need for explicit communication.
 
+Not specific to distributed planning, but an agent could use problem space analysis to preference it towards situations in which there are less possible plans, resulting in less volitile replanning.  This would lessen the impact of a environment changes that could result in multiple agents having to adjust their plans.
+
+Finally, one could consider the PSA as a means to mitigate potential faults in an agent.  Particularly when there is limited communication, it may be useful to represent the  actions of peer agents as environmental uncertainty. PSA techniques could thus be used to help an agent anticipate and plan for the potential unexpected actions of other agents.
+
+\section{Risk Assessment and Mitgation}
+
+PS Maps give a view of how frequently alternate plans occur within a range of variable attributes that are found in the scope of possible environment changes.  Particularly in cases in which the alternate plan is very different from the current plan, this could be valuable for allowing a system to prepare for switching to that plan.   A PS Map could also assist in identifying enviroment changes that are more likely to trigger the need for an alternative plan. If there are resources available to mitigate that change, then this information would allow them to be deployed most appropriately.  For example, if a PS Map were to demonstrate that modifying a TSP route to accomodate new location A is more disruptive than accomodating new location B, then steps could be taken the prevent the need for location A, or to acquire additional information about the possibility of location A, and perhaps determine that preparing for that possibility is not necessary.   
+
+Another use of a PS Map would be to determine specific attributes in which a change is likely to cause trigger a new plan.  One could observe along a specific axis of the PS Map to determine the number of plans that occur in that dimension, as well of the ranges of that attribute for which specific plans occur.  Returning to the TSP example, if the x-axis of the PS Map has more unique plans than the y-axis, one could surmise that changes in location along the x-axis are risker to the stability of the current system plan.  Similarly, one could also compare the range of x values for which these new plans occur.  If a specific plans tend to occupy a large range of values in a dimension, rather than a smaller range of values, then one could characterize the environment in which the system is operating as less volitile.
 
 
 \section{Suboptimal Plans}
