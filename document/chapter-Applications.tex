@@ -11,7 +11,9 @@ This chapter presents considerations when using the problem space analysis  (PSA
 
 The effectiveness of the algorithms described in the previous chapters requires the existence of regions in the problem space with identical solutions.  Fewer regions and larger region size allow the algorithms to be more effective.  This was demonstrated through the experiments in which  TSPs with fewer cities created fewer, larger homogeneous solution regions and had better PS Map approximation.  Likewise, elevator domains with larger N values -- that is, larger blocks of floors -- tend to be more readily approximated by the algorithms.  Conversely, increasing the number of fast elevators potentially increases the number of regions, and, consistent with the results, becomes less amenable to approximation by the algorithms.
 
-Thus, plan solution spaces have homogeneous solution regions that the algorithms attempt to exploit.  These regions could be considered a function of a problem domain's objective function, as demonstrated by the justification for SBE.  Recall that the goal of SBE is to mathematically discover boundaries between solution regions by equating the objective functions of problem instances with differing variable features.  In this way SBE discovers problem instances for which two solutions have equal utility, thus constituting a boundary between two solution regions.  
+Additionally, the algorithms tend to assume some tolerance for error between neighboring solution regions.  Outside of solution border estimation, which attempts to mathematically define solution borders, all of the algorithms merely approximate the border between solutions.  A solution space in which there is a large utility difference between neighboring solutions is likely to negatively impact performance due to errors in determining the correct solution for problem instances near those solution border locations.  If the solution regions also are small, this would exacerbate the problem.
+
+Thus, the algorithms rely on plan solution spaces containing homogeneous solution regions which the algorithms attempt to exploit.  These regions could be considered a function of a problem domain's objective function, as demonstrated by the justification for SBE.  Recall that the goal of SBE is to mathematically discover boundaries between solution regions by equating the objective functions of problem instances with differing variable features.  In this way SBE discovers problem instances for which two solutions have equal utility, thus constituting a boundary between two solution regions.  
 
 As  seen with SBE and its skeletal generation of solution region boundaries, a TSP's solution boundaries are defined by each pairwise set of unique solutions discovered by an initial sample.  Fewer unique solutions increases the number of problem instances per solution; that is, it increases the size of the solution regions.  At a given sample rate, the larger solution regions create a greater likelihood that  a random sample will include the points necessary to identify the unique solutions within the problem space.
 
@@ -105,16 +107,6 @@ A more comprehensive view of this tradeoff is shown in Figures \ref{fig:timing-k
 Similar to the knapsack problem,  the elevator domain shows a strong correlation between computation time and utility loss when the more sophisticated algorithms are employed, as shown in Figures \ref{fig:timing-elevator6pass-sc} through \ref{fig:timing-elevator6pass-svmsbe}.  However, even the random SC algorithm in this domain seems to show a tendency towards better performance at high sample rates.
 
 
-
-
-
-
-
-
-
-
-
-
 It is worth noting the discrete characteristic of several of the maps.  This results from very low variance in utility loss as a function of the discovered solutions.  That is, the set of solutions that the initial sampling discovers tends to determine the overall performance of the approximation algorithm.  This is most evident in the SSS algorithm, in which the assignment of the solutions to unsolved problem instances is most directly determined by the set of discovered solutions.  Recall that in SSS, each unsolved problem is assigned a solution by testing each previously discovered solution.  Other approximation algorithms attempt to avoid testing all discovered  the solutions, but, outside of SC, these algorithms still tend to use the information from the set of discovered solutions in a consistent, although not deterministic, manner.
 
 A similar effect explains the horizontal clustering apparent in several of the maps.  This clustering is a function of low number of solutions in the space, leading to low numbers of permutations of discovered solutions during the initial sampling stage.  Again, the performance of the algorithms is sensitive to the solutions discovered.  Thus the same permutation tends to lead to similar performance of the algorithm, resulting in clustering at a specific utility loss measure.
@@ -204,5 +196,17 @@ The results of the first experiment demonstrate that the number of unique soluti
 \label{fig:timing-k}
 \end{center}
 \end{figure}
+
+
+\section{Scalability of Algorithms}
+
+The time complexity of the algorithms presented is polynomial in the size of the problem space and sample reate, as discussed in Section \ref{sec:complexity} and summarized in Table \ref{tab:summary-of-complexity}.  This is subject to the complexity of the complexity of the generating a high quality solution, which is domain specific.  The largest challenge for algorithm scalability is thus managing the size of the problem space as the problem domains grows in complexity.  Parallelism, as discussed in Section \ref{sec:parallelization}, is a potent mitigation approach.
+
+In the TSP domain, each new location adds two dimensions to the problem space, which quickly increases in size.  As the problem space grows, algorithms that solve large portions of the unsolved problem instances at once, rather than individual problem instances, become more important.  The solution border estimation (SBE) and the support vector machine (SVM) algorithms attempt to find solutions to large regions of the space, and thus could be viable when considering more complex problem domains.  A similar evalution would hold for knapsack problem, in which two dimensions -- one for weight and one for value -- are added to the problem space with every new item that must be considered.  In the elevator domain, each new starting or destination location only adds one dimension to the space, so it grows more slowly.
+
+In terms of space complexity, storing a solution for every problem instance in a simple map would quickly become unwieldy. Initially, moving to a representation such as quad trees, which represent regions of the space, would help.  However, the best solution may be to store models, such as those generated by the SVM and SBE algorithms, rather than mappings from individual problem instances to solutions.  Also the select from sampled solutions (SSS) algorithm could be adapted to only store the solutions it finds and then match a problem instance to a solution at runtime, thereby trading off online reaction time to save storage space.
+
+As the problem size increases, another consideration is the number of samples required to reach a desired level of performance.  Intuitively, it appears that the algorithms' improvement resembles a sigmoid function: as the number of samples increase, the performance slowly improves until the number of samples reaches a critical mass. At that point, performance improve rapidly until the space is effectively represented, making additional samples redundant, and performance levels off. However, I would imagine a high degree of variability due to the stochastic nature of taking samples from a problem space.  For example, if a sample happens upon a key solution, or provides some key information regarding a solution border, then that specific sample could greatly improve the performance of that instance of the algorithm.  Thus it is possible that improvement could vary widely with each sample, particularly in a problem domain in which solutions may have very different utilities.
+
 
 
