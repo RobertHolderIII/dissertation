@@ -3,10 +3,10 @@
 
 \label{ch:application}
 
-This chapter presents considerations when using the problem space analysis  (PSA) algorithms described in the previous chapters.  It details some of the implicit criteria  for effective use of the algorithms, discusses the tradeoffs between using online repair and PSA, and describes other potential applications.
+This chapter presents considerations when using the problem space analysis  (PSA) algorithms described Chapter \ref{ch:psa}.  It details some of the implicit criteria  for effective use of the algorithms, discusses the tradeoffs between using online repair and PSA, and describes other potential applications.
 
 \section{Algorithmic Assumptions}
-
+\label{sec:algorithmic-assumptions}
 
 
 The effectiveness of the algorithms described in the previous chapters requires the existence of regions in the problem space with identical solutions.  Fewer regions and larger region size allow the algorithms to be more effective.  This was demonstrated through the experiments in which  TSPs with fewer cities created fewer, larger homogeneous solution regions and had better PS Map approximation.  Likewise, elevator domains with larger N values -- that is, larger blocks of floors -- tend to be more readily approximated by the algorithms.  Conversely, increasing the number of fast elevators potentially increases the number of regions, and, consistent with the results, becomes less amenable to approximation by the algorithms.
@@ -200,7 +200,7 @@ The results of the first experiment demonstrate that the number of unique soluti
 
 \section{Scalability of Algorithms}
 
-The time complexity of the algorithms presented is polynomial in the size of the problem space and sample reate, as discussed in Section \ref{sec:complexity} and summarized in Table \ref{tab:summary-of-complexity}.  This is subject to the complexity of the complexity of the generating a high quality solution, which is domain specific.  The largest challenge for algorithm scalability is thus managing the size of the problem space as the problem domains grows in complexity.  Parallelism, as discussed in Section \ref{sec:parallelization}, is a potent mitigation approach.
+The time complexity of the algorithms presented is polynomial in the size of the problem space and sample rate, as discussed in Section \ref{sec:complexity} and summarized in Table \ref{tab:summary-of-complexity}.  The overall complexity also depends on the complexity of generating a high-quality solution, which is domain-specific. The largest challenge for algorithm scalability is thus managing the size of the problem space as the problem domains grows in complexity.  Parallelism, as discussed in Section \ref{sec:parallelization}, is a potent mitigation approach.
 
 In the TSP domain, each new location adds two dimensions to the problem space, which quickly increases in size.  As the problem space grows, algorithms that solve large portions of the unsolved problem instances at once, rather than individual problem instances, become more important.  The solution border estimation (SBE) and the support vector machine (SVM) algorithms attempt to find solutions to large regions of the space, and thus could be viable when considering more complex problem domains.  A similar evalution would hold for knapsack problem, in which two dimensions -- one for weight and one for value -- are added to the problem space with every new item that must be considered.  In the elevator domain, each new starting or destination location only adds one dimension to the space, so it grows more slowly.
 
